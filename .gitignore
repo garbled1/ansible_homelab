@@ -1,10 +1,5 @@
 # -*- mode: gitignore; -*-
 
-netbox_inv.yml
-network_settings.yml
-switches.yml
-inventory.yml
-
 *~
 \#*\#
 /.emacs.desktop
