@@ -18,4 +18,4 @@ groups:
   linuxvm: "'VM' in tags and 'Debian' in platforms"
 compose:
   status: status.value
-token: '{{ my_token }}'
+#token: '{{ my_token }}'
