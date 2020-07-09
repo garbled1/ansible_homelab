@@ -1,0 +1,20 @@
+---
+- name: check for dns of pointed-to
+  set_fact:
+    cname_check: "{{ lookup('dig', new_cname_dest, 'qtype=A') }}"
+
+- name: Check if its a real host
+  assert:
+    that: "cname_check != 'NXDOMAIN'"
+
+- name: Create CNAME
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    type: CNAME
+    server: '{{ dns1 }}'
+    zone: '{{ domainname }}'
+    record: '{{ new_cname }}'
+    value: '{{ new_cname_dest }}'
+  delegate_to: localhost

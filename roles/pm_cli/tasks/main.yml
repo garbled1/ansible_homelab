@@ -1,0 +1,32 @@
+---
+- name: install curl
+  package:
+    name: curl
+    
+- name: mkdir /etc/patchman
+  file:
+    state: directory
+    path: /etc/patchman
+
+- name: create patchman-client.conf
+  copy:
+    src: files/patchman-client.conf
+    dest: /etc/patchman/patchman-client.conf
+
+- name: create /usr/sbin/patchman-client
+  copy:
+    src: files/patchman-client
+    dest: /usr/sbin/patchman-client
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Add cron daily
+  copy:
+    dest: /etc/cron.daily/patchman-client
+    content: |
+      #!/bin/sh
+      /usr/sbin/patchman-client
+    owner: root
+    group: root
+    mode: 0755

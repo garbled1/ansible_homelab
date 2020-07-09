@@ -1,0 +1,18 @@
+---
+- name: install ntp
+  package:
+    name: ntp
+
+- name: Set my ntp server as preferred
+  lineinfile:
+    path: /etc/ntp.conf
+    line: 'server {{ ntp_name }} prefer'
+    insertbefore: '^pool'
+    firstmatch: yes
+    regexp: '^server '
+
+- name: start ntp
+  service:
+    name: ntp
+    state: started
+    enabled: yes

@@ -1,0 +1,2 @@
+deb http://taika.garbled.net:9999/ceph-nautilus buster main
+deb http://taika.garbled.net:9999/proxmox buster pve-no-subscription

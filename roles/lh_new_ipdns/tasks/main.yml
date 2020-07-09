@@ -1,0 +1,58 @@
+---
+# on localhost, register a new name in dns and reserve ip in netbox
+# expects:
+#   new_vm_name
+#   network_settings.yml
+# sets:
+#   newip
+- name: check for dns
+  set_fact:
+    newip: "{{ lookup('dig', new_vm_name) }}"
+
+- name: show status
+  debug:
+    var: newip
+
+- name: Reserve an IP from netbox
+  netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      prefix: '{{ netbox_prefix }}'
+      status: Active
+      family: 4
+      vrf: '{{ netbox_vrf }}'
+    state: new
+  register: netbox_ip
+  delegate_to: localhost
+  when: newip == "NXDOMAIN" or newip == ""
+
+- debug:
+    var: netbox_ip.ip_address.address
+  
+- name: Write down the IP
+  set_fact:
+    newip: '{{ netbox_ip.ip_address.address.split("/")[0] }}'
+  when: newip == "NXDOMAIN" or newip == ""
+    
+- name: Create forward record
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    server: '{{ dns1 }}'
+    zone: '{{ domainname }}'
+    record: '{{ new_vm_name }}'
+    value: '{{ newip }}'
+  delegate_to: localhost
+
+- name: Create reverse record
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    server: '{{ dns1 }}'
+    type: 'PTR'
+    value: '{{ new_vm_name }}.{{ domainname }}.'
+    record: '{{ newip | ipaddr("revdns") }}'
+  delegate_to: localhost

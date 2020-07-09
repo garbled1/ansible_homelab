@@ -1,0 +1,2 @@
+deb http://taika.garbled.net:9999/raspbian/ stretch main contrib non-free rpi
+deb http://taika.garbled.net:9999/raspbian_archive/ stretch main ui

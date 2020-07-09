@@ -1,0 +1,2 @@
+deb http://taika.garbled.net:9999/raspbian/ buster main contrib non-free rpi
+deb http://taika.garbled.net:9999/raspbian_archive/ buster main ui

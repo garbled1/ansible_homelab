@@ -1,0 +1,10 @@
+# Buster
+deb http://taika.garbled.net:9999/debian/ buster main
+deb-src http://taika.garbled.net:9999/debian/ buster main
+deb http://taika.garbled.net:9999/debian/ buster-updates main contrib
+
+# Buster security
+#deb http://taika.garbled.net:9999/debian-security buster main contrib
+deb http://taika.garbled.net:9999/debian-security buster/updates main contrib
+deb-src http://taika.garbled.net:9999/debian-security buster/updates main contrib
+

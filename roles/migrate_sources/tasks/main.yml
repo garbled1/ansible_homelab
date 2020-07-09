@@ -1,0 +1,50 @@
+---
+- name: Delete the cdrom lines from apt
+  lineinfile:
+    path: /etc/apt/sources.list
+    state: absent
+    regexp: '^deb cdrom'
+
+- name: check for new sources.list
+  stat:
+    path: /etc/apt/sources.list.d/sources.list
+  register: has_new_sources
+
+- name: if not new sources, migrate
+  command: mv /etc/apt/sources.list /etc/apt/sources.list.d/sources.list
+  when: not has_new_sources.stat.exists
+
+- name: Create /etc/apt/sources.list
+  file:
+    state: touch
+    path: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create /etc/apt/sources.list.d/approx.list (x86_64)
+  copy:
+    src: files/approx.list
+    dest: /etc/apt/sources.list.d/approx.list
+    owner: root
+    group: root
+    mode: 0644
+  when: "'x86_64' in ansible_machine"
+
+- name: Create /etc/apt/sources.list.d/approx.list (rpi)
+  copy:
+    src: 'files/approx_rpi{{ ansible_distribution_major_version }}.list'
+    dest: /etc/apt/sources.list.d/approx.list
+    owner: root
+    group: root
+    mode: 0644
+  when: "'arm' in ansible_machine"
+
+- name: Create the proxmox list
+  copy:
+    src: files/approx_pve.list
+    dest: /etc/apt/sources.list.d/approx_pve.list
+    owner: root
+    group: root
+    mode: 0644
+  when: lxc_or_vm == 'ProxMox'

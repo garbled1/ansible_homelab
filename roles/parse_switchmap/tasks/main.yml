@@ -1,0 +1,139 @@
+---
+- name: Find the interfaces
+  collections:
+    - netbox.netbox
+  set_fact:
+    net_ifaces: '{{ query("netbox.netbox.nb_lookup", "interfaces", api_filter="device="+inventory_hostname, api_endpoint=netbox_server, token=netbox_token) }}'
+
+- name: Find access ports
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      access: '{{ {"vlan": item.value.untagged_vlan["vid"] | int } }}'
+      mode: 'access'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mode != None
+    - item.value.mode.value == 'access'
+    - item.value.type.value != 'virtual'
+  register: tmp_access_res
+
+- name: Find tagged ports w/o allowed
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      trunk: '{{ {"native_vlan": item.value.untagged_vlan["vid"] | int } }}'
+      mode: 'trunk'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mode != None
+    - item.value.mode.value == 'tagged'
+    - item.value.tagged_vlans | length == 0
+    - item.value.untagged_vlan != None
+    - item.value.type.value != 'virtual'
+  register: tmp_trunk_res
+
+- name: Find tagged ports with allowed
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      trunk: '{{ {"native_vlan": item.value.untagged_vlan["vid"] | int } |combine({ "trunk_allowed_vlans": item.value.tagged_vlans | map(attribute="vid") | list }) }}'
+      mode: 'trunk'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mode != None
+    - item.value.mode.value == 'tagged'
+    - item.value.tagged_vlans | length > 0
+    - item.value.untagged_vlan != None
+    - item.value.type.value != 'virtual'
+  register: tmp_trunk_res_al
+
+- name: Find tagged ports with no vlans
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      trunk: 
+      mode: 'trunk'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mode != None
+    - item.value.mode.value == 'tagged'
+    - item.value.tagged_vlans | length == 0
+    - item.value.untagged_vlan == None
+    - item.value.type.value != 'virtual'
+  register: tmp_trunk_res_none
+
+- name: Find tagged-all ports with no vlans
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      trunk: 
+      mode: 'trunk'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mode != None
+    - item.value.mode.value == 'tagged-all'
+    - item.value.tagged_vlans | length == 0
+    - item.value.untagged_vlan == None
+    - item.value.type.value != 'virtual'
+  register: tmp_trunk_res_all_none
+
+- name: Find tagged-all ports with untagged vlan
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      trunk: '{{ {"native_vlan": item.value.untagged_vlan["vid"] | int } }}'
+      mode: 'trunk'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mode != None
+    - item.value.mode.value == 'tagged-all'
+    - item.value.tagged_vlans | length == 0
+    - item.value.untagged_vlan != None
+    - item.value.type.value != 'virtual'
+  register: tmp_trunk_res_all_vlan
+
+- name: Parse out the l2_switchmap
+  set_fact:
+    l2_switchmap: "{{ l2_switchmap|default([]) + [ item.ansible_facts.tmp_ports ] }}"
+  with_items:
+    - "{{ tmp_trunk_res.results }}"
+    - "{{ tmp_trunk_res_al.results }}"
+    - "{{ tmp_access_res.results }}"
+    - "{{ tmp_trunk_res_none.results }}"
+    - "{{ tmp_trunk_res_all_none.results }}"
+    - "{{ tmp_trunk_res_all_vlan.results }}"
+  when: item.ansible_facts is defined
+
+- name: Find ports with mtu
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      mtu: '{{ item.value.mtu }}'
+      enabled: '{{ item.value.enabled }}'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mtu != None
+    - item.value.type.value != 'virtual'
+    - item.value.type.value != 'lag'
+  register: tmp_iface_mtu
+
+- name: Find ports w/o mtu
+  set_fact:
+    tmp_ports:
+      name: '{{ item.value.name }}'
+      enabled: '{{ item.value.enabled }}'
+  loop: '{{ net_ifaces }}'
+  when:
+    - item.value.mtu == None
+    - item.value.type.value != 'virtual'
+    - item.value.type.value != 'lag'
+  register: tmp_iface_no_mtu
+
+- name: Parse out the switchmap
+  set_fact:
+    switchmap: "{{ switchmap|default([]) + [ item.ansible_facts.tmp_ports ] }}"
+  with_items:
+    - "{{ tmp_iface_mtu.results }}"
+    - "{{ tmp_iface_no_mtu.results }}"
+  when: item.ansible_facts is defined

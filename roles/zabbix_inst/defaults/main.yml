@@ -1,0 +1,3 @@
+---
+lxc_or_vm: LXC
+add_zabbix_host: true

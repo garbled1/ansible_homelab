@@ -1,0 +1,66 @@
+---
+- name: install pi-bluetooth
+  package:
+    name: pi-bluetooth
+
+- name: Add apt key for mosquitto
+  apt_key:
+    url: http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key
+    state: present
+
+- name: download mosquitto repo file
+  get_url:
+    url: http://repo.mosquitto.org/debian/mosquitto-stretch.list
+    dest: /etc/apt/sources.list.d/mosquitto-stretch.list
+    mode: 0644
+
+- name: Update apt cache and install pacakges
+  apt:
+    update_cache: yes
+    name:
+      - libmosquitto-dev
+      - mosquitto
+      - mosquitto-clients
+      - libmosquitto1
+      - bluez-hcidump
+      - bc
+
+- name: checkout monitor repo
+  git:
+    repo: git://github.com/andrewjfreyer/monitor
+    dest: /root/monitor
+  ignore_errors: true
+
+- name: run monitor to generate confs
+  shell: "echo y | /root/monitor/monitor.sh"
+  args:
+    chdir: /root/monitor
+  failed_when: false
+
+- name: install mqtt_prefs
+  template:
+    src: templates/mqtt_preferences.j2
+    dest: /root/monitor/mqtt_preferences
+    mode: 0644
+
+- name: setup known addrs
+  copy:
+    dest: /root/monitor/known_static_addresses
+    content: |
+      64:7B:CE:2C:D3:C7 Tim_S9 # Tims Galaxy S9
+      48:60:5F:E2:67:B6 Annie_oldLG # Annies LG-M327
+      18:54:CF:BE:0E:3E Annie_LG # Annies new A10
+    mode: 0644
+
+- name: install service file
+  copy:
+    src: files/monitor.service
+    dest: /etc/systemd/system/monitor.service
+    mode: 0644
+
+- name: start monitor
+  systemd:
+    name: monitor
+    state: started
+    enabled: true
+    daemon_reload: true

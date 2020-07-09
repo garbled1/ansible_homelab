@@ -1,0 +1,50 @@
+---
+- name: create /etc/rsyslog.d
+  file:
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+    path: /etc/rsyslog.d
+
+- name: Install the rsyslog.conf
+  copy:
+    src: files/rsyslog.conf
+    dest: /etc/rsyslog.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install the general configs
+  copy:
+    src: 'files/{{ item }}'
+    dest: '/etc/rsyslog.d/{{ item }}'
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - "10-base.conf"
+    - "30-emergency.conf"
+    - "40-remote.conf"
+
+- name: Install the write logs to disk file
+  copy:
+    src: files/20-files.conf
+    dest: /etc/rsyslog.d/20-files.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: "'rpi' not in group_names"
+
+- name: fix /etc/localtime
+  file:
+    src: /usr/share/zoneinfo/America/Phoenix
+    dest: /etc/localtime
+    state: link
+    owner: root
+    group: root
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted

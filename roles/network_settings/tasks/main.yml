@@ -1,0 +1,56 @@
+---
+- name: Find primary VRF
+  collections:
+    - netbox.netbox
+  set_fact:
+    primary_vrf: '{{ query("netbox.netbox.nb_lookup", "vrfs", api_filter="name="+netbox_vrf, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+
+- name: set default route
+  set_fact:
+    default_gateway: '{{ primary_vrf.value.rd }}'
+
+- name: Find the ntp server
+  collections:
+    - netbox.netbox
+  set_fact:
+    ntp_service: '{{ query("netbox.netbox.nb_lookup", "services", api_filter="name=NTP", api_endpoint=netbox_server, token=netbox_token)[0] }}'
+
+- name: Lookup the ntp device
+  collections:
+    - netbox.netbox
+  set_fact:
+    ntp_service_dev: '{{ query("netbox.netbox.nb_lookup", "devices", api_filter="name="+ntp_service.value.device.name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+
+- name: ip / name of primary ntp
+  set_fact:
+    ntp_ip: '{{ ntp_service_dev.value.primary_ip4.address | ipaddr("address") }}'
+    ntp_name: '{{ ntp_service_dev.value.display_name + "." + domainname }}'
+
+- name: Lookup the iDNS service
+  collections:
+    - netbox.netbox
+  set_fact:
+    idns_service: '{{ query("netbox.netbox.nb_lookup", "services", api_filter="name=iDNS", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.ipaddresses") | list }}'
+
+- name: Gather the DNS IP's
+  set_fact:
+    dns_list: '{{ dns_list|default([]) + [ item[0].address | ipaddr("address") ] }}'
+  loop: '{{ idns_service }}'
+
+- name: Gather the VLAN list
+  collections:
+    - netbox.netbox
+  set_fact:
+    vlan_list: '{{ query("netbox.netbox.nb_lookup", "vlans", api_endpoint=netbox_server, token=netbox_token) }}'
+
+- name: Lookup the TFTP service
+  collections:
+    - netbox.netbox
+  set_fact:
+    tftp_ip: '{{ (query("netbox.netbox.nb_lookup", "services", api_filter="name=TFTP", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.ipaddresses") | list)[0][0].address | ipaddr("address") }}'
+
+- name: Lookup the FTP service
+  collections:
+    - netbox.netbox
+  set_fact:
+    ftp_ip: '{{ (query("netbox.netbox.nb_lookup", "services", api_filter="name=FTP", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.ipaddresses") | list)[0][0].address | ipaddr("address") }}'

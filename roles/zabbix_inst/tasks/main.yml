@@ -1,0 +1,52 @@
+---
+- name: install the minimum stuff
+  package:
+    name:
+      - zabbix-agent
+
+- name: Setup zabbix
+  copy:
+    dest: /etc/zabbix/zabbix_agentd.conf
+    content: |
+      PidFile=/var/run/zabbix/zabbix_agentd.pid
+      LogFile=/var/log/zabbix-agent/zabbix_agentd.log
+      LogFileSize=0
+      Server={{ zabbix_server }}
+      ServerActive={{ zabbix_server }}
+      Include=/etc/zabbix/zabbix_agentd.conf.d/*.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: activate zabbix
+  service:
+    name: zabbix-agent
+    state: started
+    enabled: yes
+
+- name: restart zabbix
+  service:
+    name: zabbix-agent
+    state: restarted
+
+- name: Add to zabbix
+  local_action:
+    module: zabbix_host
+    host_name: '{{ inventory_hostname_short }}'
+    login_password: '{{ zabbix_pw }}'
+    login_user: Admin
+    server_url: 'http://{{ zabbix_server }}/'
+    host_groups:
+      - '{{ lxc_or_vm }}'
+      - Linux servers
+    link_templates:
+      - Template OS Linux
+    interfaces:
+      - type: 1
+        main: 1
+        useip: 1
+        ip: '{{ ansible_default_ipv4.address }}'
+        dns: '{{ inventory_hostname_short }}'
+        port: 10050
+    inventory_mode: automatic
+  when: add_zabbix_host
