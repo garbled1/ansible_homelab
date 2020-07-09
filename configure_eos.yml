@@ -2,7 +2,7 @@
 - hosts: eos
   gather_facts: no
   collections:
-  - arista.eos
+  - arista_413.eos
   vars_files:
     - /home/garbled/passwords.yml
     - switchmap.yml
