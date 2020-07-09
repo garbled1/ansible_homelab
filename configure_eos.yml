@@ -21,7 +21,7 @@
           - { server: '{{ dns_list[1] }}', vrf: default }
 
     - name: Create a napalm user
-      arista.eos.eos_user:
+      eos_user:
         name: napalm
         configured_password: '{{ napalm_password }}'
         update_password: on_create
@@ -38,7 +38,7 @@
     #     config: ''
 
     - name: Set default route
-      arista.eos.eos_static_routes:
+      eos_static_routes:
         config:
           - address_families:
               - afi: ipv4
@@ -48,7 +48,7 @@
                       - interface: '{{ default_gateway }}'
 
     - name: Set the clock stuff
-      arista.eos.eos_config:
+      eos_config:
         lines:
           - 'clock timezone {{ timezone }}'
           - 'ntp server {{ ntp_name }} prefer'
@@ -56,7 +56,7 @@
         diff_against: running
 
     - name: Setup basic snmp
-      arista.eos.eos_config:
+      eos_config:
         lines:
           - snmp-server community public ro
           - snmp-server contact root@garbled.net
@@ -64,19 +64,19 @@
         diff_against: running
 
     - name: Configure the VLANs
-      arista.eos.eos_vlans:
+      eos_vlans:
         config:
           - vlan_id: '{{ item.value.vid }}'
             name: '{{ item.value.name }}'
       loop: '{{ vlan_list }}'
 
     - name: Configure the interfaces
-      arista.eos.eos_l2_interfaces:
+      eos_l2_interfaces:
         config: '{{ switchmap }}'
         state: overridden
 
     - name: Save the config
-      arista.eos.eos_command:
+      eos_command:
         commands:
           - 'copy startup-config tftp://{{ tftp_ip }}/{{ inventory_hostname }}.startup-config'
           - write
