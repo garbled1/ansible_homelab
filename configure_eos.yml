@@ -12,7 +12,7 @@
     
   tasks:
     - name: Set hostname
-      arista.eos.eos_system:
+      eos_system:
         hostname: '{{ inventory_hostname }}'
         domain_name: '{{ domainname }}'
         lookup_source: Management1
