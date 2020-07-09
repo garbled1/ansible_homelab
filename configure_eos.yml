@@ -2,7 +2,7 @@
 - hosts: eos
   gather_facts: no
   collections:
-  - arista_413.eos
+  - arista.eos
   vars_files:
     - passwords.yml
 
