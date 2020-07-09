@@ -4,8 +4,7 @@
   collections:
   - arista_413.eos
   vars_files:
-    - /home/garbled/passwords.yml
-    - switchmap.yml
+    - passwords.yml
 
   roles:
     - network_settings
