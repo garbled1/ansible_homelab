@@ -71,7 +71,7 @@
       loop: '{{ vlan_list }}'
 
     - name: Configure the interfaces
-      eos_l2_interfaces:
+      eos_interfaces:
         config: '{{ switchmap }}'
         state: overridden
 
