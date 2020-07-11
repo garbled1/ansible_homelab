@@ -1,0 +1,29 @@
+- name: Set hostname and domain
+  cisco.ios.ios_system:
+    hostname: '{{ inventory_hostname }}'
+    domain_name: '{{ domainname }}'
+    name_servers: '{{ dns_list }}'
+    lookup_source: Vlan1
+    lookup_enabled: yes
+
+- name: Set clock
+  cisco.ios.ios_config:
+    lines:
+      - clock timezone MST -7 0
+
+- name: Set NTP
+  cisco.ios.ios_ntp:
+    server: '{{ ntp_ip }}'
+    source_int: Vlan1
+    logging: true
+    state: present
+
+- name: save config to tftp, then save to device
+  cisco.ios.ios_command:
+    commands:
+      - command: 'copy startup-config tftp://{{ tftp_ip}}/{{ inventory_hostname }}.startup_config'
+        prompt: 'Address or name of remote host'
+        answer: "\r\r"
+      - command: copy running-config startup-config
+        prompt: 'Destination filename'
+        answer: "\r"

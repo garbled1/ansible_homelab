@@ -11,4 +11,4 @@
     - network_settings
     - parse_switchmap
     - { role: configure_eos_switch, when: "'eos' in group_names" }
-
+    - { role: configure_cisco_switch, when: "'cisco' in group_names" }
