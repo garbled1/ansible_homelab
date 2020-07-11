@@ -26,14 +26,9 @@
     state: present
 
 - name: Set default route
-  cisco.ios.ios_static_routes:
-    config:
-      - address_families:
-          - afi: ipv4
-            routes:
-              - dest: '0.0.0.0/0'
-                next_hops:
-                  - interface: '{{ default_gateway }}'
+  cisco.ios.ios_config:
+    lines:
+      - 'ip default-gateway {{ default_gateway }}'
 
 - name: Setup basic snmp
   cisco.ios.ios_config:
