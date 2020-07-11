@@ -75,6 +75,16 @@
         config: '{{ switchmap }}'
         state: overridden
 
+    - name: Configure the LAGs
+      eos_lag_interfaces:
+        config: '{{ lagmap }}'
+        state: overridden
+
+    - name: Configure the L2 interfaces
+      eos_l2_interfaces:
+        config: '{{ l2_switchmap }}'
+        state: overridden
+
     - name: Save the config
       eos_command:
         commands:

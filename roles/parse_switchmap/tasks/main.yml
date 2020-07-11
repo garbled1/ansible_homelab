@@ -137,3 +137,7 @@
     - "{{ tmp_iface_mtu.results }}"
     - "{{ tmp_iface_no_mtu.results }}"
   when: item.ansible_facts is defined
+
+- name: Parse out the lagmap
+  set_fact:
+    lagmap: '{{ query("nb_lookup_lag", "bunda", api_endpoint=netbox_server, token=netbox_token) }}'

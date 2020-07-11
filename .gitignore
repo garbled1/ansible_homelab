@@ -1,5 +1,7 @@
 # -*- mode: gitignore; -*-
 
+*/__pycache__/
+
 *~
 \#*\#
 /.emacs.desktop
