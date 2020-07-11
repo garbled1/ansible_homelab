@@ -43,21 +43,25 @@
       - vlan_id: '{{ item.value.vid }}'
         name: '{{ item.value.name }}'
   loop: '{{ vlan_list }}'
+  when: vlan_list is defined
 
 - name: Configure the LAGs
   cisco.ios.ios_lag_interfaces:
     config: '{{ lagmap }}'
     state: overridden
+  when: lagmap is defined
 
 - name: Configure the interfaces
   cisco.ios.ios_interfaces:
     config: '{{ switchmap }}'
     state: overridden
+  when: switchmap is defined
 
 - name: Configure the L2 interfaces
   cisco.ios.ios_l2_interfaces:
     config: '{{ l2_switchmap }}'
     state: overridden
+  when: l2_switchmap is defined
                     
 - name: save config to tftp, then save to device
   cisco.ios.ios_command:
