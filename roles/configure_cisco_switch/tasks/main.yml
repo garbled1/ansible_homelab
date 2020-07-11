@@ -37,6 +37,10 @@
       - snmp-server contact root@garbled.net
       - snmp-server location Blue Rack, Green Room
 
+- name: Enable LLDP
+  cisco.ios.ios_lldp:
+    state: present
+
 - name: Configure the VLANs
   cisco.ios.ios_vlans:
     config:

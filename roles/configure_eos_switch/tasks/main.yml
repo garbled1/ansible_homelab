@@ -51,6 +51,10 @@
       - snmp-server location Blue Rack, Green Room
     diff_against: running
 
+- name: Enable LLDP
+  arista.eos.eos_lldp:
+    state: present
+
 - name: Configure the VLANs
   arista.eos.eos_vlans:
     config:
