@@ -111,6 +111,7 @@
       name: '{{ item.value.name }}'
       mtu: '{{ item.value.mtu }}'
       enabled: '{{ item.value.enabled }}'
+      description: '{{ item.value.description }}'
   loop: '{{ net_ifaces }}'
   when:
     - item.value.mtu != None
@@ -123,6 +124,7 @@
     tmp_ports:
       name: '{{ item.value.name }}'
       enabled: '{{ item.value.enabled }}'
+      description: '{{ item.value.description }}'
   loop: '{{ net_ifaces }}'
   when:
     - item.value.mtu == None
