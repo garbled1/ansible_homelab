@@ -70,14 +70,14 @@
             name: '{{ item.value.name }}'
       loop: '{{ vlan_list }}'
 
-    - name: Configure the interfaces
-      eos_interfaces:
-        config: '{{ switchmap }}'
-        state: overridden
-
     - name: Configure the LAGs
       eos_lag_interfaces:
         config: '{{ lagmap }}'
+        state: overridden
+
+    - name: Configure the interfaces
+      eos_interfaces:
+        config: '{{ switchmap }}'
         state: overridden
 
     - name: Configure the L2 interfaces
