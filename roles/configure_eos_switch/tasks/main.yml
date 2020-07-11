@@ -61,13 +61,13 @@
       - vlan_id: '{{ item.value.vid }}'
         name: '{{ item.value.name }}'
   loop: '{{ vlan_list }}'
-  when: vlan_list is defined
+  when: vlan_list | length > 0
 
 - name: Configure the LAGs
   arista.eos.eos_lag_interfaces:
     config: '{{ lagmap }}'
     state: overridden
-  when: lagmap is defined
+  when: lagmap | length > 0
 
 - name: Configure the interfaces
   arista.eos.eos_interfaces:
