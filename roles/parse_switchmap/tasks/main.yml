@@ -116,7 +116,6 @@
   when:
     - item.value.mtu != None
     - item.value.type.value != 'virtual'
-    - item.value.type.value != 'lag'
   register: tmp_iface_mtu
 
 - name: Find ports w/o mtu
@@ -129,7 +128,6 @@
   when:
     - item.value.mtu == None
     - item.value.type.value != 'virtual'
-    - item.value.type.value != 'lag'
   register: tmp_iface_no_mtu
 
 - name: Parse out the switchmap
