@@ -1,0 +1,14 @@
+---
+- hosts: eos, cisco
+  gather_facts: no
+  collections:
+  - arista.eos
+  - cisco.ios
+  vars_files:
+    - passwords.yml
+
+  roles:
+    - network_settings
+    - parse_switchmap
+    - { role: configure_eos_switch, when: "'eos' in group_names" }
+

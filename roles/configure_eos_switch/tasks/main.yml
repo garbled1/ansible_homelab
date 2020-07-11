@@ -1,0 +1,81 @@
+---
+- name: Set hostname
+  eos_system:
+    hostname: '{{ inventory_hostname }}'
+    domain_name: '{{ domainname }}'
+    lookup_source: Management1
+    name_servers:
+      - { server: '{{ dns_list[0] }}', vrf: default }
+      - { server: '{{ dns_list[1] }}', vrf: default }
+
+- name: Create a napalm user
+  eos_user:
+    name: napalm
+    configured_password: '{{ napalm_password }}'
+    update_password: on_create
+    state: present
+
+# NEEDS json
+# - name: enable the api
+#   arista.eos.eos_eapi:
+#     state: started
+#     http: true
+#     http_port: 80
+#     https: true
+#     https_port: 443
+#     config: ''
+
+- name: Set default route
+  eos_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: '0.0.0.0/0'
+                next_hops:
+                  - interface: '{{ default_gateway }}'
+
+- name: Set the clock stuff
+  eos_config:
+    lines:
+      - 'clock timezone {{ timezone }}'
+      - 'ntp server {{ ntp_name }} prefer'
+      - ntp server 0.debian.pool.ntp.org
+    diff_against: running
+
+- name: Setup basic snmp
+  eos_config:
+    lines:
+      - snmp-server community public ro
+      - snmp-server contact root@garbled.net
+      - snmp-server location Blue Rack, Green Room
+    diff_against: running
+
+- name: Configure the VLANs
+  eos_vlans:
+    config:
+      - vlan_id: '{{ item.value.vid }}'
+        name: '{{ item.value.name }}'
+  loop: '{{ vlan_list }}'
+
+- name: Configure the LAGs
+  eos_lag_interfaces:
+    config: '{{ lagmap }}'
+    state: overridden
+
+- name: Configure the interfaces
+  eos_interfaces:
+    config: '{{ switchmap }}'
+    state: overridden
+
+- name: Configure the L2 interfaces
+  eos_l2_interfaces:
+    config: '{{ l2_switchmap }}'
+    state: overridden
+
+- name: Save the config
+  eos_command:
+    commands:
+      - 'copy startup-config tftp://{{ tftp_ip }}/{{ inventory_hostname }}.startup-config'
+      - write
+
