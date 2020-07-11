@@ -18,6 +18,52 @@
     logging: true
     state: present
 
+- name: Create a napalm user
+  cisco.ios.ios_user:
+    name: napalm
+    configured_password: '{{ napalm_password }}'
+    update_password: on_create
+    state: present
+
+- name: Set default route
+  cisco.ios.ios_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: '0.0.0.0/0'
+                next_hops:
+                  - interface: '{{ default_gateway }}'
+
+- name: Setup basic snmp
+  cisco.ios.ios_config:
+    lines:
+      - snmp-server community public ro
+      - snmp-server contact root@garbled.net
+      - snmp-server location Blue Rack, Green Room
+
+- name: Configure the VLANs
+  cisco.ios.ios_vlans:
+    config:
+      - vlan_id: '{{ item.value.vid }}'
+        name: '{{ item.value.name }}'
+  loop: '{{ vlan_list }}'
+
+- name: Configure the LAGs
+  cisco.ios.ios_lag_interfaces:
+    config: '{{ lagmap }}'
+    state: overridden
+
+- name: Configure the interfaces
+  cisco.ios.ios_interfaces:
+    config: '{{ switchmap }}'
+    state: overridden
+
+- name: Configure the L2 interfaces
+  cisco.ios.ios_l2_interfaces:
+    config: '{{ l2_switchmap }}'
+    state: overridden
+                    
 - name: save config to tftp, then save to device
   cisco.ios.ios_command:
     commands:
