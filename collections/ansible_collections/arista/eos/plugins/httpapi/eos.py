@@ -164,7 +164,7 @@ class HttpApi(HttpApiBase):
             candidate = ["configure session %s" % session] + candidate
         else:
             candidate = ["configure"] + candidate
-        candidate.append("commit")
+        candidate.append("write")
 
         try:
             responses = self.send_request(candidate)

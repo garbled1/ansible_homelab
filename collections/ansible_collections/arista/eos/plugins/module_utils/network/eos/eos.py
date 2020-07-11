@@ -420,7 +420,7 @@ class LocalEapi:
             "show session-config diffs",
         ]
         if commit:
-            commands.append("commit")
+            commands.append("write")
         else:
             commands.append("abort")
 
@@ -647,7 +647,7 @@ class HttpApi:
             "show session-config diffs",
         ]
         if commit:
-            commands.append("commit")
+            commands.append("write")
         else:
             commands.append("abort")
 
