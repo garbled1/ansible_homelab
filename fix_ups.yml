@@ -1,0 +1,16 @@
+---
+- name: Fix all the ups that are broken
+  hosts: ups
+  tasks:
+
+    - name: check block
+      block:
+        - name: Check upsc
+          command: "upsc {{ ups_name }}"
+          changed_when: false
+
+      rescue:
+        - name: recycle nut-driver
+          systemd:
+            name: nut-driver
+            state: restarted
