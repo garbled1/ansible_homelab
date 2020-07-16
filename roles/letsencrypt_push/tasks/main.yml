@@ -1,4 +1,10 @@
 ---
+- debug:
+    var: group_names
+
+- fail:
+    msg: yep
+
 - name: check for nginx
   stat:
     path: /etc/nginx
@@ -19,7 +25,7 @@
 
 - name: template in the ssl snippet
   template:
-    dest: /etc/nginx/snippets/garbled.net.conf
+    dest: '/etc/nginx/snippets/{{ cert_name }}.conf'
     src: templates/nginx_ssl_snip.conf.j2
     owner: root
     group: root
@@ -77,7 +83,7 @@
 
 # Now push me to the proxmox servers
 
-- name: push some certs to some places
+- name: push some certs to some proxmox places
   copy:
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
