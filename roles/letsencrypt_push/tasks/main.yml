@@ -1,0 +1,115 @@
+---
+- name: check for nginx
+  stat:
+    path: /etc/nginx
+  register: has_nginx
+  when:
+    - "'webservers' in group_names"
+
+- name: Create dir for snippets
+  file:
+    state: directory
+    path: /etc/nginx/snippets
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    - "'webservers' in group_names"
+    - has_nginx.stat.exists
+
+- name: template in the ssl snippet
+  template:
+    dest: /etc/nginx/snippets/garbled.net.conf
+    src: templates/nginx_ssl_snip.conf.j2
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    - "'webservers' in group_names"
+    - has_nginx.stat.exists
+
+- name: Build the pki directories
+  file:
+    state: directory
+    path: '{{ item }}'
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - '{{ pki_dir }}'
+    - '{{ cert_dir }}'
+    - '{{ pki_dir }}/letsencrypt'
+  when:
+    - "'webservers' in group_names"
+
+- name: push some certs to some places
+  copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: root
+    group: root
+    mode: '{{ item.mode }}'
+  with_items:
+    - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
+      dest: '{{ cert_dir }}/{{ cert_name }}.chained.cert'
+      mode: 0644
+    - src: '{{ keydir }}/{{ cert_name }}.cert'
+      dest: '{{ cert_dir }}/{{ cert_name }}.cert'
+      mode: 0644
+    - src: '{{ keydir }}/{{ cert_name }}.key'
+      dest: '{{ cert_dir }}/{{ cert_name }}.key'
+      mode: 0644
+    - src: '{{ keydir }}/intermediate.pem'
+      dest: '{{ intermediate_path }}'
+      mode: 0644
+  register: pushed_certs
+  when:
+    - "'webservers' in group_names"
+
+- name: reload nginx
+  systemd:
+    name: nginx
+    state: reloaded
+  when:
+    - "'webservers' in group_names"
+    - has_nginx.stat.exists
+    - pushed_certs is changed
+
+# Now push me to the proxmox servers
+
+- name: push some certs to some places
+  copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: root
+    group: www-data
+    mode: '{{ item.mode }}'
+  with_items:
+    - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
+      dest: /root/pveproxy-ssl.pem
+      mode: 0640
+    - src: '{{ keydir }}/{{ cert_name }}.key'
+      dest: /root/pveproxy-ssl.key
+      mode: 0640
+  register: pushed_certs
+  when:
+    - "'proxmox' in group_names"
+
+- name: copy the files in by hand apparently
+  command: 'cp /root/{{ item }} /etc/pve/local/{{ item }}'
+  args:
+    warn: false
+  with_items:
+    - pveproxy-ssl.pem
+    - pveproxy-ssl.key
+  when:
+    - "'proxmox' in group_names"
+    - pushed_certs is changed
+  
+- name: reload pveproxy
+  systemd:
+    name: pveproxy
+    state: reloaded
+  when:
+    - "'proxmox' in group_names"
+    - pushed_certs is changed

@@ -1,0 +1,16 @@
+---
+- name: Generate the cert
+  hosts: localhost
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+    - letsencrypt_generate
+
+- name: Now push me to everyone who cares
+  hosts: webservers,proxmox
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+    - letsencrypt_push

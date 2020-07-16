@@ -1,0 +1,91 @@
+---
+- name: Create certificate storage directory
+  file:
+    dest: "{{ keydir }}"
+    #owner: root
+    #group: root
+    mode: 0750
+    state: directory
+
+- name: Create RSA key to be used for ansible account
+  openssl_privatekey:
+    path: "{{ keydir }}/{{ le_account_key }}"
+    size: 4096
+    type: RSA
+
+- name: Create RSA key to be used for certificate
+  openssl_privatekey:
+    path: "{{ keydir }}/{{ cert_name }}.key"
+    size: 4096
+    type: RSA
+
+- name: report cert value
+  debug:
+    var: cert
+    verbosity: 1
+
+- name: Create CSR for certificate
+  openssl_csr:
+    path: "{{ keydir }}/{{ cert_name }}.csr"
+    privatekey_path: "{{ keydir }}/{{ cert_name }}.key"
+    country_name: US
+    state_or_province_name: AZ
+    organization_name: "{{ cert.organization_name }}"
+    email_address: "{{ cert.email_address }}"
+    common_name: "{{ cert.common_name }}"
+    subject_alt_name: "{{ cert.subject_alt_name }}"
+
+- name: Get ACME challenge
+  acme_certificate:
+    account_email: "{{ cert.email_address }}"
+    account_key: "{{ keydir }}/{{ le_account_key }}"
+    acme_directory: "{{ acme_directory }}"
+    acme_version: 2
+    challenge: dns-01
+    chain_dest:  "{{ keydir }}/intermediate.pem"
+    csr: "{{ keydir }}/{{ cert_name }}.csr"
+    dest: "{{ keydir }}/{{ cert_name }}.cert"
+    terms_agreed: yes
+    remaining_days: "{{ remaining_days }}"
+  register: acme_data
+
+# - debug:
+#     var: acme_data
+
+- name: Publish the challenge to DNS
+  nsupdate:
+    key_secret: "{{ extdns_dyndns_key }}"
+    key_algorithm: hmac-md5
+    key_name: dyndns-key
+    server: 'dns.{{ domainname }}'
+    zone: "{{ nsupdate_zone }}"
+    record: "_acme-challenge.{{ nsupdate_zone }}."
+    value: "{{ item.value }}"
+    type: 'TXT'
+    ttl: 1800
+    state: present
+  with_dict: "{{ acme_data.challenge_data_dns }}"
+  when: acme_data is changed
+
+- name: Wait a bit so that DNS replication happens
+  pause:
+    seconds: 60
+  when: acme_data is changed
+
+- name: Get certificate
+  acme_certificate:
+    account_email: "{{ cert.email_address }}"
+    account_key: "{{ keydir }}/{{ le_account_key }}"
+    acme_directory: "{{ acme_directory }}"
+    acme_version: 2
+    challenge: dns-01
+    chain_dest:  "{{ keydir }}/intermediate.pem"
+    csr: "{{ keydir }}/{{ cert_name }}.csr"
+    dest: "{{ keydir }}/{{ cert_name }}.cert"
+    terms_agreed: yes
+    remaining_days: "{{ remaining_days }}"
+    data: "{{ acme_data }}"
+  when: acme_data is changed
+
+- name: generate chained cert
+  shell: "cat {{ keydir }}/{{ cert_name }}.cert {{ keydir }}/intermediate.pem > {{ keydir }}/{{ cert_name }}.chained.cert"

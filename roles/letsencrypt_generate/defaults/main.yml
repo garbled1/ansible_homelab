@@ -1,0 +1,12 @@
+---
+keydir: /tmp/letsencrypt
+remaining_days: 31
+nsupdate_zone: '{{ le_zone }}.{{ domainname }}'
+cert_name: '{{ domainname }}'
+cert:
+  common_name: '*.{{ domainname }}'
+  organization_name: '{{ org_name }}'
+  email_address: '{{ email_addr }}'
+  subject_alt_name:
+    - 'DNS:*.{{ domainname }}'
+

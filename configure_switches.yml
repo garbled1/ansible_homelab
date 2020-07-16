@@ -5,7 +5,7 @@
   - arista.eos
   - cisco.ios
   vars_files:
-    - passwords.yml
+    - vars/passwords.yml
 
   roles:
     - network_settings

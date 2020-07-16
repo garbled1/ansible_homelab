@@ -1,0 +1,4 @@
+---
+acme_directory: https://acme-v02.api.letsencrypt.org/directory
+# acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+le_account_key: le.rsa.key

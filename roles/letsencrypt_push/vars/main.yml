@@ -1,0 +1,6 @@
+---
+keydir: /tmp/letsencrypt
+cert_name: '{{ domainname }}'
+pki_dir: /etc/pki
+cert_dir: '{{ pki_dir }}/{{ domainname }}'
+intermediate_path: '{{ pki_dir }}/letsencrypt/intermediate.pem'
