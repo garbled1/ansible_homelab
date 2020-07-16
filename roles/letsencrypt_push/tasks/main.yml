@@ -3,7 +3,14 @@
     var: group_names
 
 - fail:
-    msg: yep
+    msg: I will run on webserver
+  when:
+    - "'webservers' in group_names"
+
+- fail:
+    msg: I will run on proxmox
+  when:
+    - "'proxmox' in group_names"
 
 - name: check for nginx
   stat:
