@@ -140,4 +140,4 @@
 
 - name: Parse out the lagmap
   set_fact:
-    lagmap: '{{ query("nb_lookup_lag", inventory_hostname, api_endpoint=netbox_server, token=netbox_token) }}'
+    lagmap: '{{ query("nb_lookup_lag", inventory_hostname, mode="auto", api_endpoint=netbox_server, token=netbox_token) }}'
