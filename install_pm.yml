@@ -1,0 +1,10 @@
+---
+- name: install/update and run patchman-client
+  hosts: linux
+  collections:
+    - netbox.netbox
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - pm_cli
