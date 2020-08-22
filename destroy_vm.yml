@@ -16,7 +16,8 @@
     - role: rm_ip
       ip_to_delete: '{{ cur_ip }}'
     - netbox_rm_vm
-    - remove_pm
+    - role: remove_pm
+      ansible_connection: ssh
     
   post_tasks:
     - name: Delete the VM from proxmox
