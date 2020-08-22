@@ -1,0 +1,11 @@
+---
+- name: Create a new host in DNS/IPAM
+  hosts: localhost
+  connection: local
+  collections:
+    - netbox.netbox
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - lh_new_ipdns

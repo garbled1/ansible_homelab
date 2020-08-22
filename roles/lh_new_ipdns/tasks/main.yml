@@ -2,7 +2,6 @@
 # on localhost, register a new name in dns and reserve ip in netbox
 # expects:
 #   new_vm_name
-#   network_settings.yml
 # sets:
 #   newip
 - name: check for dns
@@ -14,11 +13,11 @@
     var: newip
 
 - name: Reserve an IP from netbox
-  netbox_ip_address:
+  netbox.netbox_ip_address:
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
-      prefix: '{{ netbox_prefix }}'
+      prefix: '{{ netbox_vrf }}'
       status: Active
       family: 4
       vrf: '{{ netbox_vrf }}'
@@ -40,7 +39,7 @@
     key_name: rndc-remote-key
     key_secret: '{{ rndc_remote_key }}'
     key_algorithm: hmac-md5
-    server: '{{ dns1 }}'
+    server: '{{ dns_list[0] }}'
     zone: '{{ domainname }}'
     record: '{{ new_vm_name }}'
     value: '{{ newip }}'
@@ -51,7 +50,7 @@
     key_name: rndc-remote-key
     key_secret: '{{ rndc_remote_key }}'
     key_algorithm: hmac-md5
-    server: '{{ dns1 }}'
+    server: '{{ dns_list[0] }}'
     type: 'PTR'
     value: '{{ new_vm_name }}.{{ domainname }}.'
     record: '{{ newip | ipaddr("revdns") }}'
