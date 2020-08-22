@@ -1,111 +1,53 @@
 ---
-- name: Check for VM
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/virtual-machines/?name={{ inventory_hostname_short }}'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: GET
-    status_code: 200
-  delegate_to: fafnir
-  register: has_vm
-
-- name: Create VM dev in netbox
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/virtual-machines/'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: POST
-    body:
-      cluster: 4
-      role: 8
-      name: '{{ inventory_hostname_short }}'
-      status: 1
-    body_format: json
-    status_code:
-      - 201
-      - 200
-  delegate_to: fafnir
-  when: has_vm.json.count < 1
-
-- name: Get VMid
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/virtual-machines/?name={{ inventory_hostname_short }}'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: GET
-    status_code: 200
-  delegate_to: fafnir
-  register: netbox_vmid
-
-- name: Check for interface
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/interfaces/?virtual_machine={{ inventory_hostname_short }}'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: GET
-    status_code: 200
-  delegate_to: fafnir
-  register: netbox_intf
-
-- name: Create a netbox interface
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/interfaces/'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: POST
-    body:
-      name: Ethernet
-      virtual_machine: "{{ netbox_vmid.json.results[0]['id'] | int }}"
-      mac_address: '{{ ansible_default_ipv4.macaddress }}'
-    status_code: 201
-    body_format: json
-  delegate_to: fafnir
-  when: netbox_intf.json.count < 1
-
-- name: Get interface id
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/interfaces/?virtual_machine={{ inventory_hostname_short }}'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: GET
-    status_code: 200
-  delegate_to: fafnir
-  register: netbox_iface
-
-- name: Find the id of the IP
-  local_action:
-    module: netbox_ip_address
+- name: Create VM in netbox
+  netbox.netbox.netbox_virtual_machine:
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
-      address: '{{ ansible_default_ipv4.address }}'
+      name: '{{ inventory_hostname_short }}'
+      cluster: '{{ vm_cluster }}'
+      virtual_machine_role: 'server'
+      status: 'Active'
+      tags:
+        - VM
+  register: vm_info
+
+- name: Create interface for VM in netbox
+  netbox.netbox.netbox_vm_interface:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      virtual_machine: '{{ inventory_hostname_short }}'
+      name: Ethernet
+      mac_address: '{{ ansible_default_ipv4.macaddress }}'
     state: present
-  register: netbox_ip
+  register: vm_iface_info
 
 - name: Assign IP to interface
-  uri:
-    url: '{{ netbox_server }}/api/ipam/ip-addresses/{{ netbox_ip.ip_address.id }}/'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: PUT
-    status_code: 200
-    body_format: json
-    body:
-      vrf: 1
-      address: '{{ ansible_default_ipv4.address }}'
-      dns_name: '{{ inventory_hostname_short }}'
-      interface: '{{ netbox_iface.json.results[0]["id"] }}'
-      family: 4
-  delegate_to: fafnir
+  netbox.netbox.netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
+      interface:
+        name: Ethernet
+        device: '{{ inventory_hostname_short }}'
+        address: '{{ ansible_default_ipv4.address }}'
+        dns_name: '{{ inventory_hostname_short }}'
+        family: 4
+  register: vm_ip_info
 
-- name: Mark it as primary
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/virtual-machines/{{ netbox_vmid.json.results[0]["id"] }}/'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: PATCH
-    body:
-      primary_ip4: '{{ netbox_ip.ip_address.id }}'
-    body_format: json
-    status_code: 200
-  delegate_to: fafnir
+- name: Mark interface as primary
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      name: '{{ inventory_hostname_short }}'
+      cluster: '{{ vm_cluster }}'
+      virtual_machine_role: 'server'
+      status: 'Active'
+      tags:
+        - VM
+      primary_ip4: '{{ ansible_default_ipv4.address }}'
+  register: vm_info

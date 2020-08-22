@@ -1,0 +1,177 @@
+---
+# I need:
+#  clone_id
+#  new_vm_name
+#  target_node
+#  template_name
+#  storage_name
+# Optional
+#  vm_cluster
+# The template is expected to have a hostname of "buster" and register to
+# dhcp/dyndns
+
+- name: Create a new VM in ProxMox
+  hosts: localhost
+  connection: local
+  collections:
+    - netbox.netbox
+    - community.general
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - network_settings
+    - lh_new_ipdns
+
+  post_tasks:
+    - name: Create a new VM from buster template
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: '{{ proxmox_pass }}'
+        api_host: '{{ target_node }}'
+        clone: '{{ template_name }}'
+        name: '{{ new_vm_name }}'
+        node: '{{ target_node }}'
+        storage: '{{ storage_name }}'
+        #full: false
+        #format: raw
+        timeout: 1800
+      register: new_vm
+
+    - debug:
+        var: new_vm
+
+    - pause:
+        minutes: 2
+
+    - name: Start the vm
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: '{{ proxmox_pass }}'
+        api_host: '{{ target_node }}'
+        name: '{{ new_vm_name }}'
+        node: '{{ target_node }}'
+        state: started
+      register: stuff
+
+    - debug:
+        var: stuff
+
+    - name: Create an inventory for buster
+      add_host:
+        name: buster
+        groups: template
+
+    - name: Create an inventory for the target server
+      add_host:
+        name: '{{ new_vm_name }}'
+        groups: target
+
+    - name: Wait for ssh up on template copy
+      wait_for:
+        host: buster
+        timeout: 300
+        port: 22
+        delay: 10
+
+    - name: Sleep for a few seconds to avoid stammering the new VM
+      pause:
+        seconds: 30
+
+- name: Now connect to the newly booted host and config net
+  hosts: template
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+
+  tasks:
+    - name: get IP from dns
+      set_fact:
+        newip: "{{ lookup('dig', new_vm_name) }}"
+
+    - name: Create static.network
+      copy:
+        dest: /etc/systemd/network/static.network
+        content: |
+          [Match]
+          Name=en*
+          [Network]
+          Address={{ newip }}/23
+          Gateway={{ default_gateway }}
+          DNS={{ dns_list[0] }}
+          DNS={{ dns_list[1] }}
+          Domains={{ domainname }}
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Change dhcp to static in /etc/network/interfaces
+      lineinfile:
+        path: /etc/network/interfaces
+        owner: root
+        group: root
+        regexp: '^iface (ens\d*) inet .*$'
+        line: 'iface \1 inet static'
+        backrefs: true
+
+    - name: enable systemd-networkd
+      systemd:
+        name: systemd-networkd
+        enabled: true
+
+    - name: Set my hostname
+      hostname:
+        name: '{{ new_vm_name }}'
+        #use: debian
+
+    - name: Reboot the server
+      shell: "sleep 5 && shutdown -r now"
+      async: 1
+      poll: 0
+
+    - name: Wait for ssh down
+      wait_for:
+        host: buster
+        timeout: 300
+        port: 22
+        state: stopped
+      delegate_to: localhost
+
+    - name: Wait for ssh up on new host
+      wait_for:
+        host: '{{ new_vm_name }}'
+        timeout: 300
+        port: 22
+        delay: 10
+      delegate_to: localhost
+
+- name: Now the server is up, connect and continue
+  hosts: target
+  vars_files:
+    - vars/passwords.yml
+
+  pre_tasks:
+    - name: get IP from dns
+      set_fact:
+        newip: "{{ lookup('dig', new_vm_name) }}"
+
+  roles:
+    - network_settings
+    - migrate_sources
+    - vm_setup
+    - netbox_add_vm
+    - role: zabbix_inst
+      lxc_or_vm: VM
+    - pm_cli
+    - ntp
+    - rsyslog
+
+  post_tasks:
+    - name: push the key
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', item ) }}"
+      with_fileglob:
+        - "{{ playbook_dir}}/files/*.key"
