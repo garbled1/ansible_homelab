@@ -1,4 +1,12 @@
 ---
+- name: Process PM reports just in case one is pending for this host
+  command: 'patchman -H {{ host_to_destroy }} -p'
+  delegate_to: '{{ patchman_host }}'
+  
+- name: Process PM reports just in case one is pending for this host.fqdn
+  command: 'patchman -H {{ host_to_destroy }}.{{ domainname }} -p'
+  delegate_to: '{{ patchman_host }}'
+
 - name: Remove host from patchman
   command: 'patchman -H {{ host_to_destroy }} -dh'
   delegate_to: '{{ patchman_host }}'
