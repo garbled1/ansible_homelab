@@ -20,6 +20,19 @@
       ansible_connection: ssh
     
   post_tasks:
+    - name: Power off the VM
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: '{{ proxmox_pass }}'
+        api_host: '{{ target_node }}'
+        name: '{{ host_to_destroy }}'
+        state: stopped
+        force: yes
+
+    - name: Sleep for a few seconds
+      pause:
+        seconds: 30
+
     - name: Delete the VM from proxmox
       community.general.proxmox_kvm:
         api_user: root@pam
