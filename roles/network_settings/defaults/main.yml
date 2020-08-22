@@ -4,3 +4,5 @@ zabbix_server: 'zabbix.{{ domainname }}'
 netbox_server: 'http://fafnir.{{ domainname }}'
 netbox_vrf: '192.168.10.0/23'
 timezone: 'America/Phoenix'
+patchman_server: beid
+patchman_url: 'http://{{ patchman_server }}.{{ domainname }}:3000/patchman'

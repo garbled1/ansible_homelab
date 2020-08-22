@@ -2,24 +2,32 @@
 - name: install curl
   package:
     name: curl
-    
-- name: mkdir /etc/patchman
-  file:
-    state: directory
-    path: /etc/patchman
+
+- name: Patchman install block
+  block:
+
+    - name: Download patchman deb
+      get_url:
+        url: 'https://github.com/furlongm/patchman/releases/download/v{{ patchman_version }}/patchman-client_{{ patchman_version }}-1_all.deb'
+        dest: /tmp/
+        mode: 0644
+        owner: root
+        group: root
+
+    - name: Install patchman client
+      package:
+        name: '/tmp/patchman-client_{{ patchman_version }}-1_all.deb'
+
+  always:
+    - name: Delete deb file
+      file:
+        path: '/tmp/patchman-client_{{ patchman_version }}-1_all.deb'
+        state: absent
 
 - name: create patchman-client.conf
-  copy:
-    src: files/patchman-client.conf
+  template:
+    src: templates/patchman-client.conf.j2
     dest: /etc/patchman/patchman-client.conf
-
-- name: create /usr/sbin/patchman-client
-  copy:
-    src: files/patchman-client
-    dest: /usr/sbin/patchman-client
-    owner: root
-    group: root
-    mode: 0755
 
 - name: Add cron daily
   copy:
@@ -30,3 +38,6 @@
     owner: root
     group: root
     mode: 0755
+
+- name: run pmcli
+  command: /usr/sbin/patchman-client
