@@ -13,7 +13,7 @@
     var: newip
 
 - name: Reserve an IP from netbox
-  netbox.netbox_ip_address:
+  netbox.netbox.netbox_ip_address:
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
@@ -21,6 +21,7 @@
       status: Active
       family: 4
       vrf: '{{ netbox_vrf }}'
+      dns_name: '{{ new_vm_name }}.{{ domainname }}'
     state: new
   register: netbox_ip
   delegate_to: localhost
