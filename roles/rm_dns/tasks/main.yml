@@ -1,4 +1,5 @@
 ---
+# deletes the entry cur_name
 - name: get dns entry
   set_fact:
     cur_ip: "{{ lookup('dig', cur_name) }}"
@@ -12,19 +13,19 @@
     key_name: rndc-remote-key
     key_secret: '{{ rndc_remote_key }}'
     key_algorithm: hmac-md5
-    server: '{{ dns1 }}'
+    server: '{{ dns_list[0] }}'
     zone: '{{ domainname }}'
     record: '{{ cur_name }}'
     state: absent
   delegate_to: localhost
   when: '"NXDOMAIN" not in cur_ip'
-    
+
 - name: Delete reverse record
   nsupdate:
     key_name: rndc-remote-key
     key_secret: '{{ rndc_remote_key }}'
     key_algorithm: hmac-md5
-    server: '{{ dns1 }}'
+    server: '{{ dns_list[0] }}'
     type: 'PTR'
     #value: '{{ cur_name }}.{{ domainname }}.'
     record: '{{ cur_ip | ipaddr("revdns") }}'

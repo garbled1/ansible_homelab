@@ -1,0 +1,11 @@
+---
+- name: Remove a DNS entry
+  hosts: localhost
+  connection: local
+  collections:
+    - netbox.netbox
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - rm_dns
