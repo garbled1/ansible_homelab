@@ -1,0 +1,34 @@
+---
+- name: destroy a vm
+  hosts: localhost
+  connection: local
+  collections:
+    - netbox.netbox
+    - community.general
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - role: rm_dns
+      cur_name: '{{ host_to_destroy }}'
+    - role: rm_ip
+      ip_to_delete: '{{ cur_ip }}'
+    - netbox_rm_vm
+    - remove_pm
+    
+  post_tasks:
+    - name: Delete the VM from proxmox
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: '{{ proxmox_pass }}'
+        api_host: '{{ target_node }}'
+        name: '{{ host_to_destroy }}'
+        state: absent
+
+    - name: Delete host from zabbix
+      zabbix_host:
+        host_name: '{{ host_to_destroy }}'
+        login_password: '{{ zabbix_pw }}'
+        login_user: Admin
+        server_url: 'http://{{ zabbix_server }}/'
+        state: absent

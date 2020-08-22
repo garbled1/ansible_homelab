@@ -1,0 +1,4 @@
+---
+- name: Remove host from patchman
+  command: 'patchman -H {{ host_to_destroy }} -dh'
+  delegate_to: '{{ patchman_host }}'

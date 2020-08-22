@@ -1,0 +1,9 @@
+---
+- name: Delete VM in netbox
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      name: '{{ host_to_destroy }}'
+    state: absent
+  register: vm_info

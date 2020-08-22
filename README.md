@@ -30,3 +30,9 @@ Ansible playbooks and code to operate my homelab
     * Gather switch data from netbox to configure a switch
   * netbox_add_vm
     * Create a new VM in netbox
+  * pm_cli
+    * Install and run patchman-client
+  * remove_pm
+    * remove a host from patchman
+  * netbox_rm_vm
+    * remove a vm from netbox
