@@ -1,0 +1,10 @@
+---
+- name: Create (or replace) a cname
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - network_settings
+    - cname
