@@ -3,26 +3,15 @@
   package:
     name: curl
 
-- name: Patchman install block
-  block:
+- name: Install patchman-client (deb)
+  apt:
+    deb: 'https://github.com/furlongm/patchman/releases/download/v{{ patchman_version }}/patchman-client_{{ patchman_version }}-1_all.deb'
+  when: ansible_distribution_file_variety == 'Debian'
 
-    - name: Download patchman deb
-      get_url:
-        url: 'https://github.com/furlongm/patchman/releases/download/v{{ patchman_version }}/patchman-client_{{ patchman_version }}-1_all.deb'
-        dest: /tmp/
-        mode: 0644
-        owner: root
-        group: root
-
-    - name: Install patchman client
-      package:
-        name: '/tmp/patchman-client_{{ patchman_version }}-1_all.deb'
-
-  always:
-    - name: Delete deb file
-      file:
-        path: '/tmp/patchman-client_{{ patchman_version }}-1_all.deb'
-        state: absent
+- name: Install patchman-client (rpm)
+  yum:
+    name: 'https://github.com/furlongm/patchman/releases/download/v{{ patchman_version }}/patchman-client-{{ patchman_version }}-1.noarch.rpm'
+  when: ansible_distribution_file_variety == 'RedHat'
 
 - name: create patchman-client.conf
   template:
