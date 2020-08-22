@@ -1,0 +1,10 @@
+---
+- name: Delete IP from netbox
+  netbox.netbox.netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
+      address: '{{ ip_to_delete }}'
+    state: absent

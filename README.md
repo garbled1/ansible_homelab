@@ -8,6 +8,9 @@ Ansible playbooks and code to operate my homelab
   * rm_dns
     * Deletes a DNS record
 	* expects a var of cur_name
+  * rm_ip
+    * Delete an IP from netbox
+	* expects ip_to_delete
   * cname
 	* Create new CNAME (all variables are short hostname, NOT FQDN)
 	* new_cname: new name
@@ -25,4 +28,5 @@ Ansible playbooks and code to operate my homelab
 	* Currently hardcodes some stuff in vars/main.yml, sorry.
   * parse_switchmap
     * Gather switch data from netbox to configure a switch
-  
+  * netbox_add_vm
+    * Create a new VM in netbox
