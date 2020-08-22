@@ -13,7 +13,7 @@
     key_secret: '{{ rndc_remote_key }}'
     key_algorithm: hmac-md5
     type: CNAME
-    server: '{{ dns1 }}'
+    server: '{{ dns_list[0] }}'
     zone: '{{ domainname }}'
     record: '{{ new_cname }}'
     value: '{{ new_cname_dest }}'
