@@ -164,6 +164,10 @@
     - vars/passwords.yml
 
   pre_tasks:
+    - name: Safety check
+      assert:
+        that: ansible_hostname != 'lich'
+
     - name: get IP from dns
       set_fact:
         newip: "{{ lookup('dig', new_vm_name) }}"
