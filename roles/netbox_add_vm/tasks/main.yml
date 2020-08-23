@@ -30,14 +30,14 @@
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
-      prefix: '{{ netbox_prefix }}'
+      #prefix: '{{ netbox_prefix }}'
       vrf: '{{ netbox_vrf }}'
       address: '{{ ansible_default_ipv4.address }}'
+      family: 4
       interface:
         name: Ethernet
         virtual_machine: '{{ inventory_hostname_short }}'
         dns_name: '{{ inventory_hostname_short }}'
-        family: 4
   register: vm_ip_info
   delegate_to: localhost
 
