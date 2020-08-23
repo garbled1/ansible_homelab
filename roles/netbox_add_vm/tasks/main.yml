@@ -25,58 +25,58 @@
   register: vm_iface_info
   delegate_to: localhost
 
-# - name: Assign IP to interface
-#   netbox.netbox.netbox_ip_address:
-#     netbox_url: '{{ netbox_server }}'
-#     netbox_token: '{{ netbox_token }}'
-#     data:
-#       prefix: '{{ netbox_prefix }}'
-#       vrf: '{{ netbox_vrf }}'
-#       address: '{{ ansible_default_ipv4.address }}'
-#       dns_name: '{{ inventory_hostname_short }}'
-#       #family: 4
-#       interface:
-#         name: Ethernet
-#         virtual_machine: '{{ inventory_hostname_short }}'
-#     state: present
-#   register: vm_ip_info
-#   delegate_to: localhost
-
-- name: Get interface id
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/interfaces/?virtual_machine={{ inventory_hostname_short }}'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: GET
-    status_code: 200
-  delegate_to: localhost
-  register: netbox_iface
-
-- name: Find the id of the IP
+- name: Assign IP to interface
   netbox.netbox.netbox_ip_address:
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
-      address: '{{ ansible_default_ipv4.address }}'
-    state: present
-  register: netbox_ip
-  delegate_to: localhost
-
-- name: Assign IP to interface
-  uri:
-    url: '{{ netbox_server }}/api/ipam/ip-addresses/{{ netbox_ip.ip_address.id }}/'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: PUT
-    status_code: 200
-    body_format: json
-    body:
-      vrf: 1
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
       address: '{{ ansible_default_ipv4.address }}'
       dns_name: '{{ inventory_hostname_short }}'
-      interface: '{{ netbox_iface.json.results[0]["id"] }}'
-      family: 4
+      #family: 4
+      interface:
+        name: Ethernet
+        virtual_machine: '{{ inventory_hostname_short }}'
+    state: new
+  register: vm_ip_info
   delegate_to: localhost
+
+# - name: Get interface id
+#   uri:
+#     url: '{{ netbox_server }}/api/virtualization/interfaces/?virtual_machine={{ inventory_hostname_short }}'
+#     headers:
+#       Authorization: 'Token {{ netbox_token }}'
+#     method: GET
+#     status_code: 200
+#   delegate_to: localhost
+#   register: netbox_iface
+
+# - name: Find the id of the IP
+#   netbox.netbox.netbox_ip_address:
+#     netbox_url: '{{ netbox_server }}'
+#     netbox_token: '{{ netbox_token }}'
+#     data:
+#       address: '{{ ansible_default_ipv4.address }}'
+#     state: present
+#   register: netbox_ip
+#   delegate_to: localhost
+
+# - name: Assign IP to interface
+#   uri:
+#     url: '{{ netbox_server }}/api/ipam/ip-addresses/{{ netbox_ip.ip_address.id }}/'
+#     headers:
+#       Authorization: 'Token {{ netbox_token }}'
+#     method: PUT
+#     status_code: 200
+#     body_format: json
+#     body:
+#       vrf: 1
+#       address: '{{ ansible_default_ipv4.address }}'
+#       dns_name: '{{ inventory_hostname_short }}'
+#       interface: '{{ netbox_iface.json.results[0]["id"] }}'
+#       family: 4
+#   delegate_to: localhost
 
 - name: Mark interface as primary
   netbox.netbox.netbox_virtual_machine:
