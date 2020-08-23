@@ -32,12 +32,12 @@
     data:
       prefix: '{{ netbox_prefix }}'
       #vrf: '{{ netbox_vrf }}'
-      address: '{{ ansible_default_ipv4.address }}/23'
+      address: '{{ ansible_default_ipv4.address }}'
+      dns_name: '{{ inventory_hostname_short }}'
       #family: 4
       interface:
         name: Ethernet
         virtual_machine: '{{ inventory_hostname_short }}'
-        dns_name: '{{ inventory_hostname_short }}'
   register: vm_ip_info
   delegate_to: localhost
 
