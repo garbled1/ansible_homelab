@@ -68,18 +68,18 @@
   register: vm_info
   delegate_to: localhost
 
-- name: Fix role
-  uri:
-    url: '{{ netbox_server }}/api/virtualization/virtual-machines/'
-    headers:
-      Authorization: 'Token {{ netbox_token }}'
-    method: PATCH
-    body:
-      role: 8
-      cluster: 4
-      name: '{{ inventory_hostname_short }}'
-    body_format: json
-    status_code:
-      - 201
-      - 200
-  delegate_to: localhost
+# - name: Fix role
+#   uri:
+#     url: '{{ netbox_server }}/api/virtualization/virtual-machines/'
+#     headers:
+#       Authorization: 'Token {{ netbox_token }}'
+#     method: POST
+#     body:
+#       role: 8
+#       cluster: 4
+#       name: '{{ inventory_hostname_short }}'
+#     body_format: json
+#     status_code:
+#       - 201
+#       - 200
+#   delegate_to: localhost
