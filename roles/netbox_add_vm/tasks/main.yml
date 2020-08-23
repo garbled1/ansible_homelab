@@ -32,7 +32,7 @@
     data:
       prefix: '{{ netbox_prefix }}'
       #vrf: '{{ netbox_vrf }}'
-      address: '{{ ansible_default_ipv4.address }}'
+      address: '{{ ansible_default_ipv4.address }}/23'
       #family: 4
       interface:
         name: Ethernet
