@@ -39,7 +39,7 @@
         name: '{{ new_vm_name }}'
         node: '{{ target_node }}'
         storage: '{{ storage_name }}'
-        #full: false
+        full: false
         #format: raw
         timeout: 1800
       register: new_vm
@@ -58,7 +58,7 @@
         name: '{{ new_vm_name }}'
         node: '{{ target_node }}'
         cores: '{{ vm_cpu }}'
-        memory: '{{ vm_memory }}'
+        memory: '{{ vm_mem }}'
         state: started
       register: stuff
 
