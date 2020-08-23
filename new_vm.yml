@@ -50,7 +50,7 @@
     - pause:
         minutes: 2
 
-    - name: Start the vm and tweak settings
+    - name: tweak settings
       community.general.proxmox_kvm:
         api_user: root@pam
         api_password: '{{ proxmox_pass }}'
@@ -59,9 +59,18 @@
         node: '{{ target_node }}'
         cores: '{{ vm_cpu }}'
         memory: '{{ vm_mem }}'
-        state: started
+        balloon: 512
         update: true
       register: stuff
+
+    - name: Start the vm
+      community.general.proxmox_kvm:
+        api_user: root@pam
+        api_password: '{{ proxmox_pass }}'
+        api_host: '{{ target_node }}'
+        name: '{{ new_vm_name }}'
+        node: '{{ target_node }}'
+        state: started
 
     - debug:
         var: stuff
