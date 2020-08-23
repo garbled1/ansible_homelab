@@ -34,7 +34,7 @@
       vrf: '{{ netbox_vrf }}'
       interface:
         name: Ethernet
-        device: '{{ inventory_hostname_short }}'
+        virtual_machine: '{{ inventory_hostname_short }}'
         address: '{{ ansible_default_ipv4.address }}'
         dns_name: '{{ inventory_hostname_short }}'
         family: 4
