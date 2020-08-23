@@ -1,0 +1,22 @@
+- name: Do local
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: hello
+      command: uname -a
+
+    - name: add host
+      add_host:
+        name: taika
+        groups: fizz
+
+- name: test far
+  hosts: fizz
+  tasks:
+    - name: hello
+      command: uname -a
+
+    - name: hello self
+      command: uname -a
+      delegate_to: localhost

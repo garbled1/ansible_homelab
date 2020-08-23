@@ -70,15 +70,11 @@
       add_host:
         name: buster
         groups: template
-        vars:
-          ansible_connection: ssh
 
     - name: Create an inventory for the target server
       add_host:
         name: '{{ new_vm_name }}'
         groups: target
-        vars:
-          ansible_connection: ssh
 
     - name: Wait for ssh up on template copy
       wait_for:
@@ -147,12 +143,6 @@
       async: 1
       poll: 0
 
-    - name: This makes me angry
-      add_host:
-        name: localhost
-        vars:
-          ansible_connection: local
-      
     - name: Wait for ssh down
       wait_for:
         host: buster
