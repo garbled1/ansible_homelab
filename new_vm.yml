@@ -47,8 +47,8 @@
     - debug:
         var: new_vm
 
-    - pause:
-        minutes: 2
+    # - pause:
+    #     minutes: 2
 
     - name: Start the vm and tweak settings
       community.general.proxmox_kvm:
@@ -86,12 +86,13 @@
         port: 22
         delay: 10
 
-    - name: Sleep for a few seconds to avoid stammering the new VM
-      pause:
-        seconds: 30
+    # - name: Sleep for a few seconds to avoid stammering the new VM
+    #   pause:
+    #     seconds: 30
 
 - name: Now connect to the newly booted host and config net
   hosts: buster
+  connection: ssh
   vars_files:
     - vars/passwords.yml
   vars:
