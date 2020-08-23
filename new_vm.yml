@@ -60,6 +60,7 @@
         cores: '{{ vm_cpu }}'
         memory: '{{ vm_mem }}'
         state: started
+        update: true
       register: stuff
 
     - debug:
