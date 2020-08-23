@@ -36,7 +36,6 @@
       interface:
         name: Ethernet
         virtual_machine: '{{ inventory_hostname_short }}'
-        address: '{{ ansible_default_ipv4.address }}/{{ ansible_default_ipv4.netmask | ipaddr("prefix") }}'
         dns_name: '{{ inventory_hostname_short }}'
         family: 4
   register: vm_ip_info
