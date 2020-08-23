@@ -25,6 +25,17 @@
   register: vm_iface_info
   delegate_to: localhost
 
+- name: Delete the fucking IP
+  netbox.netbox.netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
+      address: '{{ ansible_default_ipv4.address }}'
+    state: absent
+  delegate_to: localhost
+
 - name: Assign IP to interface
   netbox.netbox.netbox_ip_address:
     netbox_url: '{{ netbox_server }}'
@@ -38,7 +49,7 @@
       interface:
         name: Ethernet
         virtual_machine: '{{ inventory_hostname_short }}'
-    state: new
+    state: present
   register: vm_ip_info
   delegate_to: localhost
 
