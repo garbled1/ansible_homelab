@@ -31,9 +31,9 @@
     netbox_token: '{{ netbox_token }}'
     data:
       prefix: '{{ netbox_prefix }}'
-      vrf: '{{ netbox_vrf }}'
+      #vrf: '{{ netbox_vrf }}'
       address: '{{ ansible_default_ipv4.address }}'
-      family: 4
+      #family: 4
       interface:
         name: Ethernet
         virtual_machine: '{{ inventory_hostname_short }}'
