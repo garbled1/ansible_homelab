@@ -23,7 +23,7 @@
     vm_mem: 512
     clone_id: 113
     template_name: debian-buster-tmpl
-    storage: vm_rbd
+    storage_name: vm_rbd
 
   roles:
     - network_settings
