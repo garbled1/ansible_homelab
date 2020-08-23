@@ -73,7 +73,7 @@
     url: '{{ netbox_server }}/api/virtualization/virtual-machines/'
     headers:
       Authorization: 'Token {{ netbox_token }}'
-    method: POST
+    method: PATCH
     body:
       role: 8
       cluster: 4
