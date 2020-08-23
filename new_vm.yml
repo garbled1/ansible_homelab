@@ -69,11 +69,15 @@
       add_host:
         name: buster
         groups: template
+        vars:
+          ansible_connection: ssh
 
     - name: Create an inventory for the target server
       add_host:
         name: '{{ new_vm_name }}'
         groups: target
+        vars:
+          ansible_connection: ssh
 
     - name: Wait for ssh up on template copy
       wait_for:
@@ -90,6 +94,8 @@
   hosts: buster
   vars_files:
     - vars/passwords.yml
+  vars:
+    ansible_connection: ssh
   roles:
     - network_settings
 
