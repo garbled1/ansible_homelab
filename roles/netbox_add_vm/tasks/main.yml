@@ -32,7 +32,7 @@
     data:
       prefix: '{{ netbox_prefix }}'
       #vrf: '{{ netbox_vrf }}'
-      address: '{{ ansible_default_ipv4.address }}'
+      address: '{{ ansible_default_ipv4.address }}/23'
       dns_name: '{{ inventory_hostname_short }}'
       #family: 4
       interface:
