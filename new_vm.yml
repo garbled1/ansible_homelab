@@ -147,6 +147,12 @@
       async: 1
       poll: 0
 
+    - name: This makes me angry
+      add_host:
+        name: localhost
+        vars:
+          ansible_connection: local
+      
     - name: Wait for ssh down
       wait_for:
         host: buster
