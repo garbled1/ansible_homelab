@@ -196,7 +196,7 @@
     - name: Delete the localhost entry for buster
       lineinfile:
         path: /etc/hosts
-        regexp: '^127\.0\.0\.1.*buster.*'
+        regexp: '^127\.0.*buster'
         state: absent
         owner: root
         mode: 0644
