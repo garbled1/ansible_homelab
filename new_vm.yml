@@ -87,13 +87,18 @@
         seconds: 30
 
 - name: Now connect to the newly booted host and config net
-  hosts: template
+  hosts: buster
+  ansible_connection: ssh
   vars_files:
     - vars/passwords.yml
   roles:
     - network_settings
 
   tasks:
+    - name: Safety check
+      assert:
+        that: ansible_hostname != 'lich'
+    
     - name: get IP from dns
       set_fact:
         newip: "{{ lookup('dig', new_vm_name) }}"
