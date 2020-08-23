@@ -13,8 +13,8 @@
 - name: apt update
   apt:
     update_cache: yes
-    upgrade: yes
-    
+    upgrade: "yes"
+
 - name: install the minimum stuff
   package:
     name:
