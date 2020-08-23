@@ -50,3 +50,4 @@
         port: 10050
     inventory_mode: automatic
   when: add_zabbix_host
+  ignore_errors: true
