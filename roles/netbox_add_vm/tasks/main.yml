@@ -6,7 +6,7 @@
     data:
       name: '{{ inventory_hostname_short }}'
       cluster: '{{ vm_cluster }}'
-      virtual_machine_role: 'server'
+      virtual_machine_role: 'Server'
       status: 'Active'
       tags:
         - VM
@@ -48,7 +48,7 @@
     data:
       name: '{{ inventory_hostname_short }}'
       cluster: '{{ vm_cluster }}'
-      virtual_machine_role: 'server'
+      virtual_machine_role: 'Server'
       status: 'Active'
       tags:
         - VM
