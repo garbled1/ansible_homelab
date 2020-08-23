@@ -1,0 +1,20 @@
+- name: Create a new VM in ProxMox
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Create an inventory for buster
+      add_host:
+        name: buster
+        groups: template
+        vars:
+          ansible_connection: ssh
+
+- name: Do things wiht buster
+  hosts: template
+  tasks:
+
+    - name: Safety check
+      assert:
+        that: ansible_hostname != 'lich'
+
