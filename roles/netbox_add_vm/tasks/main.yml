@@ -30,7 +30,7 @@
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
-      #prefix: '{{ netbox_prefix }}'
+      prefix: '{{ netbox_prefix }}'
       vrf: '{{ netbox_vrf }}'
       address: '{{ ansible_default_ipv4.address }}'
       family: 4
@@ -54,4 +54,19 @@
         - VM
       primary_ip4: '{{ ansible_default_ipv4.address }}'
   register: vm_info
+  delegate_to: localhost
+
+- name: Fix role
+  uri:
+    url: '{{ netbox_server }}/api/virtualization/virtual-machines/'
+    headers:
+      Authorization: 'Token {{ netbox_token }}'
+    method: POST
+    body:
+      role: 8
+      name: '{{ inventory_hostname_short }}'
+    body_format: json
+    status_code:
+      - 201
+      - 200
   delegate_to: localhost
