@@ -88,7 +88,6 @@
 
 - name: Now connect to the newly booted host and config net
   hosts: buster
-  ansible_connection: ssh
   vars_files:
     - vars/passwords.yml
   roles:
