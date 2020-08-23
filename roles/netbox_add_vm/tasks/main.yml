@@ -11,6 +11,7 @@
       tags:
         - VM
   register: vm_info
+  delegate_to: localhost
 
 - name: Create interface for VM in netbox
   netbox.netbox.netbox_vm_interface:
@@ -22,6 +23,7 @@
       mac_address: '{{ ansible_default_ipv4.macaddress }}'
     state: present
   register: vm_iface_info
+  delegate_to: localhost
 
 - name: Assign IP to interface
   netbox.netbox.netbox_ip_address:
@@ -37,6 +39,7 @@
         dns_name: '{{ inventory_hostname_short }}'
         family: 4
   register: vm_ip_info
+  delegate_to: localhost
 
 - name: Mark interface as primary
   netbox.netbox.netbox_virtual_machine:
@@ -51,3 +54,4 @@
         - VM
       primary_ip4: '{{ ansible_default_ipv4.address }}'
   register: vm_info
+  delegate_to: localhost

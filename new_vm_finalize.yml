@@ -1,0 +1,52 @@
+- name: Finalize a VM if initial fails
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Create an inventory for the target server
+      add_host:
+        name: '{{ new_vm_name }}'
+        groups: target
+
+- name: Now the server is up, connect and continue
+  hosts: target
+  vars_files:
+    - vars/passwords.yml
+
+  pre_tasks:
+    - name: Safety check
+      assert:
+        that: ansible_hostname != 'lich'
+
+    - name: get IP from dns
+      set_fact:
+        newip: "{{ lookup('dig', new_vm_name) }}"
+
+  roles:
+    - network_settings
+    - migrate_sources
+    - vm_setup
+    - netbox_add_vm
+    - role: zabbix_inst
+      lxc_or_vm: VM
+    - pm_cli
+    - ntp
+    - rsyslog
+
+  post_tasks:
+    - name: push the key
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', item ) }}"
+      with_fileglob:
+        - "{{ playbook_dir}}/files/*.key"
+
+    - name: Delete the localhost entry for buster
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.0\.1.*buster.*'
+        state: absent
+        owner: root
+        mode: 0644
+
