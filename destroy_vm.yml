@@ -15,6 +15,7 @@
       cur_name: '{{ host_to_destroy }}'
     - role: rm_ip
       ip_to_delete: '{{ cur_ip }}'
+      when: '"NXDOMAIN" not in cur_ip'
     - netbox_rm_vm
     - role: remove_pm
       ansible_connection: ssh

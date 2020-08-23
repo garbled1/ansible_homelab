@@ -18,6 +18,12 @@
     - community.general
   vars_files:
     - vars/passwords.yml
+  vars:
+    vm_cpu: 1
+    vm_mem: 512
+    clone_id: 113
+    template_name: debian-buster-tmpl
+    storage: vm_rbd
 
   roles:
     - network_settings
@@ -44,13 +50,15 @@
     - pause:
         minutes: 2
 
-    - name: Start the vm
+    - name: Start the vm and tweak settings
       community.general.proxmox_kvm:
         api_user: root@pam
         api_password: '{{ proxmox_pass }}'
         api_host: '{{ target_node }}'
         name: '{{ new_vm_name }}'
         node: '{{ target_node }}'
+        cores: '{{ vm_cpu }}'
+        memory: '{{ vm_memory }}'
         state: started
       register: stuff
 

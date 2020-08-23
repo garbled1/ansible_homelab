@@ -31,3 +31,4 @@
     record: '{{ cur_ip | ipaddr("revdns") }}'
     state: absent
   delegate_to: localhost
+  when: '"NXDOMAIN" not in cur_ip'
