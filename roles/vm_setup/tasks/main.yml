@@ -25,3 +25,4 @@
       - tcpdump
       - dnsutils
       - parted
+      - gnupg2
