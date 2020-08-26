@@ -25,48 +25,48 @@
   register: vm_iface_info
   delegate_to: localhost
 
-- name: Delete the fucking IP
-  netbox.netbox.netbox_ip_address:
-    netbox_url: '{{ netbox_server }}'
-    netbox_token: '{{ netbox_token }}'
-    data:
-      #prefix: '{{ netbox_prefix }}'
-      vrf: '{{ netbox_vrf }}'
-      address: '{{ ansible_default_ipv4.address }}'
-    state: absent
-  delegate_to: localhost
+# - name: Delete the fucking IP
+#   netbox.netbox.netbox_ip_address:
+#     netbox_url: '{{ netbox_server }}'
+#     netbox_token: '{{ netbox_token }}'
+#     data:
+#       #prefix: '{{ netbox_prefix }}'
+#       vrf: '{{ netbox_vrf }}'
+#       address: '{{ ansible_default_ipv4.address }}'
+#     state: absent
+#   delegate_to: localhost
 
-- name: Assign IP to interface
-  netbox.netbox.netbox_ip_address:
-    netbox_url: '{{ netbox_server }}'
-    netbox_token: '{{ netbox_token }}'
-    data:
-      prefix: '{{ netbox_prefix }}'
-      vrf: '{{ netbox_vrf }}'
-      address: '{{ ansible_default_ipv4.address }}'
-      dns_name: '{{ inventory_hostname_short }}'
-      #family: 4
-      interface:
-        name: Ethernet
-        virtual_machine: '{{ inventory_hostname_short }}'
-    state: present
-  register: vm_ip_info
-  delegate_to: localhost
+# - name: Assign IP to interface
+#   netbox.netbox.netbox_ip_address:
+#     netbox_url: '{{ netbox_server }}'
+#     netbox_token: '{{ netbox_token }}'
+#     data:
+#       prefix: '{{ netbox_prefix }}'
+#       vrf: '{{ netbox_vrf }}'
+#       address: '{{ ansible_default_ipv4.address }}'
+#       dns_name: '{{ inventory_hostname_short }}'
+#       #family: 4
+#       interface:
+#         name: Ethernet
+#         virtual_machine: '{{ inventory_hostname_short }}'
+#     state: present
+#   register: vm_ip_info
+#   delegate_to: localhost
 
-- name: Mark interface as primary
-  netbox.netbox.netbox_virtual_machine:
-    netbox_url: '{{ netbox_server }}'
-    netbox_token: '{{ netbox_token }}'
-    data:
-      name: '{{ inventory_hostname_short }}'
-      cluster: '{{ vm_cluster }}'
-      #virtual_machine_role: 'Server'
-      status: 'Active'
-      tags:
-        - VM
-      primary_ip4: '{{ ansible_default_ipv4.address }}'
-  register: vm_info
-  delegate_to: localhost
+# - name: Mark interface as primary
+#   netbox.netbox.netbox_virtual_machine:
+#     netbox_url: '{{ netbox_server }}'
+#     netbox_token: '{{ netbox_token }}'
+#     data:
+#       name: '{{ inventory_hostname_short }}'
+#       cluster: '{{ vm_cluster }}'
+#       #virtual_machine_role: 'Server'
+#       status: 'Active'
+#       tags:
+#         - VM
+#       primary_ip4: '{{ ansible_default_ipv4.address }}'
+#   register: vm_info
+#   delegate_to: localhost
 
 # - name: Fix role
 #   uri:
