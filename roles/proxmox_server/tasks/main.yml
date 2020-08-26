@@ -1,0 +1,112 @@
+---
+- name: ceph
+  copy:
+    dest: /etc/apt/sources.list.d/ceph.list
+    content: |
+      deb http://download.proxmox.com/debian/ceph-nautilus buster main
+
+- name: pve-no-subscription
+  copy:
+    dest: /etc/apt/sources.list.d/pve-no-subscription.list
+    content: |
+      deb http://download.proxmox.com/debian/pve buster pve-no-subscription
+
+- name: remove enterprise
+  file:
+    path: /etc/apt/sources.list.d/pve-enterprise.list
+    state: absent
+
+- name: install zabbix
+  package:
+    name: zabbix-agent
+    state: present
+
+- name: setup zabbix-agent
+  copy:
+    dest: /etc/zabbix/zabbix_agentd.conf
+    content: |
+      PidFile=/var/run/zabbix/zabbix_agentd.pid
+      LogFile=/var/log/zabbix-agent/zabbix_agentd.log
+      LogFileSize=0
+      Server={{ zabbix_server }}
+      ServerActive={{ zabbix_server }}
+      Include=/etc/zabbix/zabbix_agentd.conf.d/*.conf
+
+- name: mkdir conf.d
+  file:
+    state: directory
+    path: /etc/zabbix/zabbix_agentd.conf.d
+
+- name: mkdir scripts
+  file:
+    state: directory
+    path: /etc/zabbix/scripts
+
+- name: mini-ipmi
+  copy:
+    dest: /etc/zabbix/zabbix_agentd.conf.d/userparameter_mini-ipmi2.conf
+    content: |
+      UserParameter=mini.disktemp.discovery[*], sudo "/etc/zabbix/scripts/mini_ipmi_smartctl.py" "$1" "$2"
+      UserParameter=mini.cputemp.discovery[*], "/etc/zabbix/scripts/mini_ipmi_lmsensors.py" "$1" "$2"
+
+- name: install lmsensors
+  package:
+    name: lm-sensors
+    state: present
+
+- name: detect sensors
+  command: sensors-detect --auto
+
+- name: install scripts
+  copy:
+    src: 'files/{{ item }}'
+    dest: /etc/zabbix/scripts
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - mini_ipmi_lmsensors.py
+    - mini_ipmi_smartctl.py
+    - sender_wrapper.py
+
+- name: install sudoers file
+  copy:
+    src: files/zabbix
+    dest: /etc/sudoers.d/zabbix
+    owner: root
+    group: root
+    mode: 0600
+
+- name: pvestatus.cfg
+  copy:
+    dest: /tmp/status.cfg
+    src: files/status.cfg
+    mode: 0644
+
+- name: Copy pvestatus.cfg into place
+  command: cp /tmp/status.cfg /etc/pve/status.cfg
+
+- name: Force apt to allow releasinfo changes
+  command: apt-get update --allow-releaseinfo-change
+  args:
+    warn: false
+
+- name: apt update
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: install the minimum stuff
+  package:
+    name:
+      - curl
+      - net-tools
+      - tcpdump
+      - dnsutils
+
+- name: Install the things we need for proxmox
+  package:
+    name:
+      - ipmitool
+      - nut
+      - ifupdown2
