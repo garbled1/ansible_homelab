@@ -6,3 +6,12 @@
     - network_settings
     - migrate_sources
     - proxmox_server
+
+  post_tasks:
+    - name: push the key
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', item ) }}"
+      with_fileglob:
+        - "{{ playbook_dir}}/files/*.key"
