@@ -65,16 +65,16 @@
   with_items:
     - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
       dest: '{{ cert_dir }}/{{ cert_name }}.chained.cert'
-      mode: 0644
+      mode: '0644'
     - src: '{{ keydir }}/{{ cert_name }}.cert'
       dest: '{{ cert_dir }}/{{ cert_name }}.cert'
-      mode: 0644
+      mode: '0644'
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '{{ cert_dir }}/{{ cert_name }}.key'
-      mode: 0644
+      mode: '0644'
     - src: '{{ keydir }}/intermediate.pem'
       dest: '{{ intermediate_path }}'
-      mode: 0644
+      mode: '0644'
   register: pushed_certs
   when:
     - "'webservers' in group_names"
@@ -100,10 +100,10 @@
   with_items:
     - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
       dest: /root/pveproxy-ssl.pem
-      mode: 0640
+      mode: '0640'
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: /root/pveproxy-ssl.key
-      mode: 0640
+      mode: '0640'
   register: pushed_certs
   when:
     - "'proxmox' in group_names"
@@ -148,20 +148,32 @@
   with_items:
     - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
       dest: '{{ pki_dir }}/freenas_default.crt'
-      mode: 0644
+      mode: '0644'
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '{{ pki_dir }}/freenas_default.key'
-      mode: 0400
+      mode: '0400'
     - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
       dest: '/etc/certificates/freenas_default.crt'
-      mode: 0644
+      mode: '0644'
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '/etc/certificates/freenas_default.key'
-      mode: 0400
+      mode: '0400'
+    - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
+      dest: '/usr/local/etc/minio/certs/public.crt'
+      mode: '0644'
+    - src: '{{ keydir }}/{{ cert_name }}.key'
+      dest: '/usr/local/etc/minio/certs/private.key'
+      mode: '0400'
   when: "'platforms_FreeNAS' in group_names"
 
 - name: Restart nginx
   service:
     name: nginx
     state: reloaded
+  when: "'platforms_FreeNAS' in group_names"
+
+- name: Restart minio
+  service:
+    name: minio
+    state: restart
   when: "'platforms_FreeNAS' in group_names"
