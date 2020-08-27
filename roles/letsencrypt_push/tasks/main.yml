@@ -158,12 +158,22 @@
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '/etc/certificates/freenas_default.key'
       mode: '0400'
+  when: "'platforms_FreeNAS' in group_names"
+
+- name: push some certs to FreeNAS-minio
+  copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: minio
+    group: minio
+    mode: '{{ item.mode }}'
+  with_items:
     - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
       dest: '/usr/local/etc/minio/certs/public.crt'
       mode: '0644'
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '/usr/local/etc/minio/certs/private.key'
-      mode: '0400'
+      mode: '0600'
   when: "'platforms_FreeNAS' in group_names"
 
 - name: Restart nginx
