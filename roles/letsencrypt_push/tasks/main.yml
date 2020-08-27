@@ -164,3 +164,4 @@
   service:
     name: nginx
     state: reloaded
+  when: "'platforms_FreeNAS' in group_names"
