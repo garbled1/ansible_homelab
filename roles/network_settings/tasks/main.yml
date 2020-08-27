@@ -54,3 +54,9 @@
     - netbox.netbox
   set_fact:
     ftp_ip: '{{ (query("netbox.netbox.nb_lookup", "services", api_filter="name=FTP", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.ipaddresses") | list)[0][0].address | ipaddr("address") }}'
+
+- name: Lookup the internal_relay service
+  collections:
+    - netbox.netbox
+  set_fact:
+    internal_relay_port: '{{ (query("netbox.netbox.nb_lookup", "services", api_filter="name=internal_relay", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.port") | list)[0] }}'

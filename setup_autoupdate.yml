@@ -5,4 +5,5 @@
     - vars/passwords.yml
   roles:
     - network_settings
+    - postfix_internal
     - debian_unatt_upg
