@@ -1,0 +1,5 @@
+---
+au_auto_reboot: "false"
+au_hour: '02'
+au_minute: '00'
+au_time_random: yes

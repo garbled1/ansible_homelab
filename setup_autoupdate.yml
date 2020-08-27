@@ -1,0 +1,8 @@
+---
+- name: Setup autoupdate on hosts
+  hosts: tags_autoupdate
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+    - debian_unatt_upg
