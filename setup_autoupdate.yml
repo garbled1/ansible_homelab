@@ -7,3 +7,4 @@
     - network_settings
     - postfix_internal
     - debian_unatt_upg
+    - pm_cli
