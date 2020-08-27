@@ -126,3 +126,30 @@
   when:
     - "'proxmox' in group_names"
     - pushed_certs is changed
+
+# Now deal with FreeNAS
+
+- name: Create /etc/pki
+  file:
+    state: directory
+    path: /etc/pki
+    owner: root
+    group: wheel
+    mode: 0755
+  when: "'platforms_FreeNAS' in group_names"
+
+- name: push some certs to FreeNAS
+  copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: root
+    group: root
+    mode: '{{ item.mode }}'
+  with_items:
+    - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
+      dest: '{{ pki_dir }}/freenas_default.crt'
+      mode: 0644
+    - src: '{{ keydir }}/{{ cert_name }}.key'
+      dest: '{{ pki_dir }}/freenas_default.key'
+      mode: 0400
+  when: "'platforms_FreeNAS' in group_names"
