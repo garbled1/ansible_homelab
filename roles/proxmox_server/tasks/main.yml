@@ -110,3 +110,15 @@
       - ipmitool
       - nut
       - ifupdown2
+
+- name: Need uidmap for taika
+  lineinfile:
+    path: /etc/subuid
+    line: 'root:2001:2'
+    insertafter: EOF
+
+- name: Need gidmap for taika
+  lineinfile:
+    path: /etc/subgid
+    line: 'root:2001:2'
+    insertafter: EOF
