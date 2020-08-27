@@ -175,5 +175,5 @@
 - name: Restart minio
   service:
     name: minio
-    state: restart
+    state: restarted
   when: "'platforms_FreeNAS' in group_names"
