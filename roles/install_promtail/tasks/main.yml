@@ -145,6 +145,7 @@
     name: filebeat
     enabled: false
     state: stopped
+  ignore_errors: true
 
 - name: deinstall filebeat
   package:
