@@ -2,3 +2,4 @@
 promtail_version: 'v1.6.1'
 promtail_arm: 'https://github.com/grafana/loki/releases/download/{{ promtail_version }}/promtail-linux-arm.zip'
 promtail_amd64: 'https://github.com/grafana/loki/releases/download/{{ promtail_version }}/promtail-linux-amd64.zip'
+install_promtail: false
