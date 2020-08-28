@@ -1,0 +1,7 @@
+---
+- name: Setup rsyslog on linux
+  hosts: all
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - rsyslog
