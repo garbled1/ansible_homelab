@@ -1,0 +1,157 @@
+---
+- name: Check for nginx
+  stat:
+    path: /var/log/nginx
+  register: has_nginx
+
+- name: Check for apache2
+  stat:
+    path: /var/log/apache2
+  register: has_apache
+
+- name: Check for 
+  stat:
+    path: /var/log/pmgproxy
+  register: has_pmg
+
+- name: Check for postgres12
+  stat:
+    path: /u1/pgsql/12/main/log
+  register: has_postgres
+
+- name: Check for mysql
+  stat:
+    path: /var/log/mysql
+  register: has_mysql
+
+- name: Check for proxmox
+  stat:
+    path: /var/log/pve
+  register: has_proxmox
+
+- name: install promtail?
+  set_fact:
+    install_promtail: true
+  when: has_nginx.stat.exists or has_apache.stat.exists or has_pmg.stat.exists or has_postgres.stat.exists or has_mysql.stat.exists or has_proxmox.stat.exists
+
+- name: Create loki group
+  group:
+    name: loki
+  when: install_promtail
+
+- name: Create loki user
+  user:
+    name: loki
+    shell: /bin/false
+    group: loki
+  when: install_promtail
+
+- name: Create /var/log/positions.yaml
+  file:
+    state: touch
+    path: /var/log/positions.yaml
+    owner: loki
+    group: loki
+    mode: 0664
+  when: install_promtail
+
+- name: fetch promtail (arm)
+  get_url:
+    url: '{{ promatil_arm }}'
+    dest: /tmp/promtail.gz
+    mode: 0644
+  when:
+    - "'arm' in ansible_machine"
+    - install_promtail
+
+- name: fetch promtail (x86)
+  get_url:
+    url: '{{ promatil_amd64 }}'
+    dest: /tmp/promtail.gz
+    mode: 0644
+  when:
+    - "'x86_64' in ansible_machine"
+    - install_promtail
+
+- name: uncompress promtail
+  shell: gunzip -c /tmp/promtail.gz >/usr/local/bin/promtail
+  args:
+    creates: /usr/local/bin/promtail
+  when: install_promtail
+
+- name: fix perms
+  file:
+    path: /usr/local/bin/promtail
+    owner: root
+    group: root
+    mode: 0755
+  when: install_promtail
+
+- name: Add webserver config
+  template:
+    src: templates/webserver.j2
+    dest: /etc/promtail.yaml
+    owner: loki
+    group: loki
+    mode: 0644
+  when: has_nginx.stat.exists or has_apache.stat.exists
+
+- name: Add pmg config
+  template:
+    src: templates/pmg.j2
+    dest: /etc/promtail.yaml
+    owner: loki
+    group: loki
+    mode: 0644
+  when: has_pmg.stat.exists
+
+- name: Add proxmox config
+  template:
+    src: templates/webserver.j2
+    dest: /etc/promtail.yaml
+    owner: loki
+    group: loki
+    mode: 0644
+  when: has_proxmox.stat.exists
+
+- name: Add db config
+  template:
+    src: templates/webserver.j2
+    dest: /etc/promtail.yaml
+    owner: loki
+    group: loki
+    mode: 0644
+  when: has_mysql.stat.exists or has_postgres.stat.exists
+
+- name: Install service file
+  copy:
+    src: files/promtail.service
+    dest: /etc/systemd/system/promtail.service
+    owner: root
+    group: root
+    mode: 0644
+  when: install_promtail
+
+- name: daemon reload and set
+  systemd:
+    name: promtail
+    daemon_reload: true
+    enabled: true
+    state: started
+  when: install_promtail
+
+- name: disable filebeat
+  systemd:
+    name: filebeat
+    enabled: false
+    state: stopped
+
+- name: deinstall filebeat
+  package:
+    state: absent
+    name: filebeat
+
+- name: delete elastic apt config
+  file:
+    state: absent
+    path: /etc/apt/sources.list.d/elastic-7.x.list

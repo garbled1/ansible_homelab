@@ -1,0 +1,9 @@
+---
+- name: Setup rsyslog on linux
+  hosts: all
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+    - install_promtail
+

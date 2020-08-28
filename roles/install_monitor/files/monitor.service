@@ -1,0 +1,13 @@
+[Unit]
+Description=Monitor Service
+After=network.target
+
+[Service]
+User=root
+ExecStart=/bin/bash /root/monitor/monitor.sh -tad &
+WorkingDirectory=/root/monitor
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target network.target

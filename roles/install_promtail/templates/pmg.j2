@@ -1,0 +1,33 @@
+server:
+  disable: true
+#  http_listen_port: 9080
+#  grpc_listen_port: 0
+
+positions:
+  filename: /var/log/positions.yaml
+
+client:
+  url: http://syslog.{{ domainname }}:3100/loki/api/v1/push
+
+scrape_configs:
+ - job_name: pmgproxy
+   pipeline_stages:
+   static_configs:
+   - labels:
+      job: pmgproxy
+      host: {{ inventory_hostname }}
+      __path__: /var/log/pmgproxy/*.log
+ - job_name: postgres
+   pipeline_stages:
+   static_configs:
+   - labels:
+      job: postgres
+      host: {{ inventory_hostname }}
+      __path__: /var/log/postgresql/*.log
+ - job_name: clamav
+   pipeline_stages:
+   static_configs:
+   - labels:
+      job: clamav
+      host: {{ inventory_hostname }}
+      __path__: /var/log/clamav/*.log

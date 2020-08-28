@@ -1,0 +1,19 @@
+server:
+  disable: true
+#  http_listen_port: 9080
+#  grpc_listen_port: 0
+
+positions:
+  filename: /var/log/positions.yaml
+
+client:
+  url: http://syslog.{{ domainname }}:3100/loki/api/v1/push
+
+scrape_configs:
+ - job_name: proxmox
+   pipeline_stages:
+   static_configs:
+   - labels:
+      job: proxmox
+      host: {{ inventory_hostname }}
+      __path__: /var/log/*/*.log

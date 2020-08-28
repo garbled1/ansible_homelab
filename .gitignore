@@ -53,8 +53,8 @@ flycheck_*.el
 .libs/
 .deps/
 Makefile
-*.service
-*.timer
+#*.service
+#*.timer
 libtool
 
 

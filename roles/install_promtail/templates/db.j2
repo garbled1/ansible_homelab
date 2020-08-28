@@ -1,0 +1,26 @@
+server:
+  disable: true
+#  http_listen_port: 9080
+#  grpc_listen_port: 0
+
+positions:
+  filename: /var/log/positions.yaml
+
+client:
+  url: http://syslog.{{ domainname }}:3100/loki/api/v1/push
+
+scrape_configs:
+ - job_name: mysql
+   pipeline_stages:
+   static_configs:
+   - labels:
+      job: mysql
+      host: {{ inventory_hostname }}
+      __path__: /var/log/mysql/*.log
+ - job_name: postgres
+   pipeline_stages:
+   static_configs:
+   - labels:
+      job: postgres
+      host: {{ inventory_hostname }}
+      __path__: /u1/pgsql/12/main/log/*.log
