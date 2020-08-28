@@ -46,10 +46,10 @@
     group: loki
   when: install_promtail
 
-- name: Create /var/log/positions.yaml
+- name: Create /var/log/loki
   file:
-    state: touch
-    path: /var/log/positions.yaml
+    state: directory
+    path: /var/log/loki
     owner: loki
     group: loki
     mode: 0664
@@ -137,7 +137,7 @@
     name: promtail
     daemon_reload: true
     enabled: true
-    state: started
+    state: restarted
   when: install_promtail
 
 - name: disable filebeat
