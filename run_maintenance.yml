@@ -1,0 +1,25 @@
+---
+- name: Perform maintenance as needed
+  hosts: all
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+    - pm_cli
+    - rsyslog
+    - install_promtail
+
+  tasks:
+    - name: disable NTP on LXC
+      service:
+        name: ntp
+        state: stopped
+        enabled: no
+      ignore_errors: true
+      when: inventory_hostname in groups['tags_LXC']
+
+    - name: Deinstall ntp
+      package:
+        name: ntp
+        state: absent
+      when: inventory_hostname in groups['tags_LXC']
