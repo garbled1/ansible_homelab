@@ -66,6 +66,18 @@
     config: '{{ l2_switchmap }}'
     state: overridden
   when: l2_switchmap is defined
+
+- name: Set the timestamps to be correct
+  cisco.ios.ios_config:
+    lines:
+      - service timestamps log datetime
+
+- name: configure host logging
+  cisco.ios.ios_logging:
+    dest: host
+    name: 'syslog.{{ domainname }}'
+    level: informational
+    state: present
                     
 - name: save config to tftp, then save to device
   cisco.ios.ios_command:

@@ -81,6 +81,13 @@
     state: overridden
   when: l2_switchmap is defined
 
+- name: configure host logging
+  arista.eos.eos_logging:
+    dest: host
+    name: 'syslog.{{ domainname }}'
+    level: informational
+    state: present
+
 - name: Save the config
   arista.eos.eos_command:
     commands:
