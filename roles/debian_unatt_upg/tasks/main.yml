@@ -25,6 +25,14 @@
     group: root
     mode: 0644
 
+- name: Install the auto-updates enabler
+  template:
+    src: files/20auto-upgrades
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: 0644
+
 - name: Create override dirs
   file:
     state: directory
