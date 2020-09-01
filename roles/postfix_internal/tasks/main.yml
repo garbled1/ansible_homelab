@@ -6,12 +6,15 @@
 - name: install postfix
   package:
     name: postfix
+  when: inventory_hostname not in groups['tags_mailserver']
 
 - name: set mydomain
   command: postconf -e "mydomain = {{ domainname }}"
+  when: inventory_hostname not in groups['tags_mailserver']
 
 - name: set myhostname
   command: postconf -e "myhostname = {{ inventory_hostname }}.{{ domainname }}"
+  when: inventory_hostname not in groups['tags_mailserver']
 
 - name: set relayhost
   command: postconf -e "relayhost = mail.{{ domainname }}:{{ internal_relay_port }}"
