@@ -1,6 +1,6 @@
 ---
 - name: Run an apt update
-    apt:
+  apt:
     update_cache: yes
 
 - name: Install unattended-upgrades
