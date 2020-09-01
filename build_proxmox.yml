@@ -8,6 +8,9 @@
     - network_settings
     - migrate_sources
     - proxmox_server
+    - rsyslog
+    - install_promtail
+    - pm_cli
 
   post_tasks:
     - name: push the key
