@@ -122,3 +122,9 @@
     path: /etc/subgid
     line: 'root:2001:2'
     insertafter: EOF
+
+- name: Download the dark theme
+  get_url:
+    url: https://raw.githubusercontent.com/Weilbyte/PVEDiscordDark/master/PVEDiscordDark.py
+    dest: /root/PVEDiscordDark.py
+    mode: '0755'
