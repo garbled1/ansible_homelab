@@ -8,6 +8,7 @@
     - pm_cli
     - rsyslog
     - install_promtail
+    - postfix_internal
     - role: debian_unatt_upg
       when: inventory_hostname in groups['tags_autoupdate']
 
