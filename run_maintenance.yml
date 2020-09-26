@@ -5,6 +5,7 @@
     - vars/passwords.yml
   roles:
     - network_settings
+    - migrate_sources
     - pm_cli
     - rsyslog
     - install_promtail
