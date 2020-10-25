@@ -89,3 +89,6 @@
 
 - name: generate chained cert
   shell: "cat {{ keydir }}/{{ cert_name }}.cert {{ keydir }}/intermediate.pem > {{ keydir }}/{{ cert_name }}.chained.cert"
+
+- name: generate concatenated cert
+  shell: "cat {{ keydir }}/{{ cert_name }}.key {{ keydir }}/{{ cert_name }}.cert {{ keydir }}/intermediate.pem > {{ keydir }}/{{ cert_name }}.concat.cert"

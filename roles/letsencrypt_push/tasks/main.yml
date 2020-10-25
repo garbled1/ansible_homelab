@@ -19,6 +19,16 @@
   when:
     - "'webservers' in group_names"
 
+- name: check for pmgproxy
+  stat:
+    path: /etc/pmg
+  register: has_pmg
+
+- name: check for dovecot
+  stat:
+    path: /etc/dovecot
+  register: has_dovecot
+
 - name: Create dir for snippets
   file:
     state: directory
@@ -187,3 +197,30 @@
     name: minio
     state: restarted
   when: "'platforms_FreeNAS' in group_names"
+
+- name: Install pmgproxy cert
+  copy:
+    src: '{{ keydir }}/{{ cert_name }}.concat.cert'
+    dest: /etc/pmg/pmg-api.pem
+    owner: root
+    group: www-data
+    mode: 0640
+  when: has_pmg.stat.exists
+  register: pushed_pmgcert
+
+- name: restart pmgproxy
+  systemd:
+    name: pmgproxy
+    state: reloaded
+  when:
+    - has_pmg.stat.exists
+    - pushed_pmgcert is changed
+
+- name: restart dovecot
+  systemd:
+    name: dovecot
+    state: reloaded
+  when:
+    - has_dovecot.stat.exists
+    - pushed_certs is changed
+
