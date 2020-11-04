@@ -1,0 +1,4 @@
+---
+vm_interface_name_table:
+  VM: ens18
+  LXC: eth0

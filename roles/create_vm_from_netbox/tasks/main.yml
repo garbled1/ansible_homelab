@@ -1,0 +1,64 @@
+---
+- name: Lookup the VM in netbox
+  set_fact:
+    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtual-machines", api_filter="name="+{{ new_vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+
+- name: Create a new VM from buster template
+  community.general.proxmox_kvm:
+    api_user: root@pam
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ target_node }}'
+    clone: '{{ template_name }}'
+    name: '{{ new_vm_name }}'
+    node: '{{ target_node }}'
+    storage: '{{ storage_name }}'
+    #full: false
+    #format: raw
+    timeout: 1800
+  register: new_vm
+  when: vm_record["status"] == "planned"
+
+- name: Show the vm creation details
+  debug:
+    var: new_vm
+  when: vm_record["status"] == "planned"
+
+- name: Sleep for 2 minutes to allow settling
+  pause:
+    minutes: 2
+  when: vm_record["status"] == "planned"
+
+- name: tweak settings on new VM from proxmox
+  community.general.proxmox_kvm:
+    api_user: root@pam
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ target_node }}'
+    name: '{{ new_vm_name }}'
+    node: '{{ target_node }}'
+    cores: '{{ vm_record["vcpus"] | default("1") }}'
+    memory: '{{ vm_record["memory"] | default("512") }}'
+    balloon: 512
+    update: true
+
+- name: Start the vm if not already started
+  community.general.proxmox_kvm:
+    api_user: root@pam
+    api_password: '{{ proxmox_pass }}'
+    api_host: '{{ target_node }}'
+    name: '{{ new_vm_name }}'
+    node: '{{ target_node }}'
+    state: started
+
+- name: Set the VM to staged if we just cloned it
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      name: '{{ vm_name }}'
+      status: 'Staged'
+  when: vm_record["status"] == "planned"
+  delegate_to: localhost
+
+- name: Lookup the VM in netbox again to pull new state
+  set_fact:
+    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtual-machines", api_filter="name="+{{ new_vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'

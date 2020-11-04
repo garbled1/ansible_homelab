@@ -1,0 +1,10 @@
+---
+vm_cluster: Hydra
+vm_name: '{{ inventory_hostname_short }}'
+vm_disk_size: 16
+vm_memory_size: 512
+vm_vcpus: 1
+vm_platform: Debian
+vm_or_lcx: VM
+vm_interface_name: '{{ vm_interface_name_table[vm_or_lxc] }}'
+vm_mtu: 1500

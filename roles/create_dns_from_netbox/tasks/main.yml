@@ -1,0 +1,85 @@
+---
+# on localhost, lookup a vm in netbox, and create a DNS record for it
+# delete incorrect one if exists
+# expects:
+#   vm_name
+# sets:
+#   cur_ip
+- name: Ask netbox what the IP is
+  set_fact:
+    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+{{ vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+
+- name: check for dns
+  set_fact:
+    assigned_ip: '{{ vm_assigned_ip_record[0].split("/")[0] }}'
+    cur_ip: "{{ lookup('dig', vm_name) }}"
+
+- name: show assigned_ip
+  debug:
+    var: assigned_ip
+
+- name: Delete forward if does not match netbox
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    server: '{{ dns_list[0] }}'
+    zone: '{{ domainname }}'
+    record: '{{ vm_name }}'
+    state: absent
+  delegate_to: localhost
+  when:
+    - '"NXDOMAIN" not in cur_ip'
+    - cur_ip != ""
+    - cur_ip != assigned_ip
+
+- name: Delete reverse record if does not match netbox
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    server: '{{ dns_list[0] }}'
+    type: 'PTR'
+    record: '{{ cur_ip | ipaddr("revdns") }}'
+    state: absent
+  delegate_to: localhost
+  when:
+    - '"NXDOMAIN" not in cur_ip'
+    - cur_ip != ""
+    - cur_ip != assigned_ip
+
+- name: Sleep for a few seconds
+  pause:
+    seconds: 30
+
+- name: Create forward record
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    server: '{{ dns_list[0] }}'
+    zone: '{{ domainname }}'
+    record: '{{ vm_name }}'
+    value: '{{ assigned_ip }}'
+  delegate_to: localhost
+
+- name: Create reverse record
+  nsupdate:
+    key_name: rndc-remote-key
+    key_secret: '{{ rndc_remote_key }}'
+    key_algorithm: hmac-md5
+    server: '{{ dns_list[0] }}'
+    type: 'PTR'
+    value: '{{ vm_name }}.{{ domainname }}.'
+    record: '{{ assigned_ip | ipaddr("revdns") }}'
+  delegate_to: localhost
+
+- name: update netbox to status Active
+  netbox.netbox.netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      address: '{{ assigned_ip }}'
+      status: Active
+    state: present
+  delegate_to: localhost

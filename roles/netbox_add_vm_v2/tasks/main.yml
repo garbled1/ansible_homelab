@@ -1,0 +1,85 @@
+---
+- name: Create VM in netbox
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      name: '{{ vm_name }}'
+      cluster: '{{ vm_cluster }}'
+      virtual_machine_role: 'Server'
+      status: 'Planned'
+      disk: '{{ vm_disk_size }}'
+      memory: '{{ vm_memory_size }}'
+      platform: '{{ vm_platform }}'
+      vcpus: '{{ vm_vcpus }}'
+      tags:
+        - '{{ vm_or_lxc }}'
+  register: vm_info
+  delegate_to: localhost
+
+- name: Create interface for VM in netbox
+  netbox.netbox.netbox_vm_interface:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      virtual_machine: '{{ vm_name }}'
+      name: '{{ vm_interface_name }}'
+      enabled: yes
+      mtu: '{{ vm_mtu }}'
+    state: present
+  register: vm_iface_info
+  delegate_to: localhost
+
+- name: Check if this server has an IP assigned or not
+  set_fact:
+    vm_assigned_ip_records: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="dns_name__ic="+{{ vm_name }}, api_endpoint=netbox_server, token=netbox_token) }}'
+
+- name: Request a new IP, and assign it to the interface
+  netbox.netbox.netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
+      family: 4
+      status: Reserved
+      assigned_object:
+        name: '{{ vm_interface_name }}'
+        virtual_machine: '{{ vm_name }}'
+        dns_name: '{{ vm_name }}.{{ domainname }}'
+    state: new
+  register: vm_ip_info
+  delegate_to: localhost
+  when: vm_assigned_ip_records|length == 0
+
+- name: Update the existing IP record and or assign to vm
+  netbox.netbox.netbox_ip_address:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
+      family: 4
+      status: Reserved
+      assigned_object:
+        name: '{{ vm_interface_name }}'
+        virtual_machine: '{{ vm_name }}'
+        dns_name: '{{ vm_name }}.{{ domainname }}'
+    state: present
+  register: vm_ip_info
+  delegate_to: localhost
+  when: vm_assigned_ip_records|length != 0
+  
+- name: Ask netbox what the IP is
+  set_fact:
+    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+{{ vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+
+- name: Set the primary v4 addr
+  netbox.netbox.netbox_virtual_machine:
+    netbox_url: '{{ netbox_server }}'
+    netbox_token: '{{ netbox_token }}'
+    data:
+      name: '{{ vm_name }}'
+      primary_ip4: '{{ vm_assigned_ip_record["address"].split("/")[0] }}'
+  register: vm_info_new
+  delegate_to: localhost
