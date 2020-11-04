@@ -1,4 +1,4 @@
-plugin: netbox
+plugin: netbox.netbox.nb_inventory
 api_endpoint: http://fafnir.garbled.net/
 validate_certs: false
 config_context: False
