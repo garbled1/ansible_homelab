@@ -43,10 +43,10 @@
       vrf: '{{ netbox_vrf }}'
       family: 4
       status: Reserved
+      dns_name: '{{ vm_name }}.{{ domainname }}'
       assigned_object:
         name: '{{ vm_interface_name }}'
         virtual_machine: '{{ vm_name }}'
-        dns_name: '{{ vm_name }}.{{ domainname }}'
     state: new
   register: vm_ip_info
   delegate_to: localhost
