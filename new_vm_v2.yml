@@ -12,7 +12,7 @@
 
 - name: Create a new VM in Netbox, create a dns record for it
   hosts: localhost
-  conneciton: local
+  connection: local
   collections:
     - netbox.netbox
     - community.general
