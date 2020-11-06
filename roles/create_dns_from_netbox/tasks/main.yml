@@ -7,7 +7,7 @@
 #   cur_ip
 - name: Ask netbox what the IP is
   set_fact:
-    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+{{ vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+vm_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
 
 - name: check for dns
   set_fact:

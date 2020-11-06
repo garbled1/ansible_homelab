@@ -32,7 +32,7 @@
 
 - name: Check if this server has an IP assigned or not
   set_fact:
-    vm_assigned_ip_records: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="dns_name__ic="+{{ vm_name }}, api_endpoint=netbox_server, token=netbox_token) }}'
+    vm_assigned_ip_records: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="dns_name__ic="+vm_name, api_endpoint=netbox_server, token=netbox_token) }}'
 
 - name: Request a new IP, and assign it to the interface
   netbox.netbox.netbox_ip_address:
@@ -72,7 +72,7 @@
   
 - name: Ask netbox what the IP is
   set_fact:
-    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+{{ vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+vm_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
 
 - name: Set the primary v4 addr
   netbox.netbox.netbox_virtual_machine:

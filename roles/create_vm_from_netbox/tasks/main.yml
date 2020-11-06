@@ -1,7 +1,7 @@
 ---
 - name: Lookup the VM in netbox
   set_fact:
-    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtual-machines", api_filter="name="+{{ new_vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtual-machines", api_filter="name="+new_vm_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
 
 - name: Create a new VM from buster template
   community.general.proxmox_kvm:
@@ -61,4 +61,4 @@
 
 - name: Lookup the VM in netbox again to pull new state
   set_fact:
-    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtual-machines", api_filter="name="+{{ new_vm_name }}, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtual-machines", api_filter="name="+new_vm_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
