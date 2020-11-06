@@ -11,7 +11,7 @@
 
 - name: check for dns
   set_fact:
-    assigned_ip: '{{ vm_assigned_ip_record[0].split("/")[0] }}'
+    assigned_ip: '{{ vm_assigned_ip_record["value"]["address"].split("/")[0] }}'
     cur_ip: "{{ lookup('dig', vm_name) }}"
 
 - name: show assigned_ip

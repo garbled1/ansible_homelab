@@ -80,6 +80,6 @@
     netbox_token: '{{ netbox_token }}'
     data:
       name: '{{ vm_name }}'
-      primary_ip4: '{{ vm_assigned_ip_record["address"].split("/")[0] }}'
+      primary_ip4: '{{ vm_assigned_ip_record["value"]["address"].split("/")[0] }}'
   register: vm_info_new
   delegate_to: localhost
