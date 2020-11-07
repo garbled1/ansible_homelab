@@ -30,7 +30,7 @@
       vm_vcpus: '{{ vm_cpu }}'
       vm_or_lxc: 'VM'
     - role: create_dns_from_netbox
-      vm_name: '{{ new_vm_name }}'
+      dev_name: '{{ new_vm_name }}'
 
 - name: Create a new VM in ProxMox, based on netbox lookup
   hosts: localhost

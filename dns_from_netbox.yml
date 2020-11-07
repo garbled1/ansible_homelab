@@ -1,0 +1,12 @@
+---
+- name: Create a DNS record for a device with IP in netbox
+  hosts: localhost
+  connection: local
+  collections:
+    - netbox.netbox
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - network_settings
+    - create_dns_from_netbox

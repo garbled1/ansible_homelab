@@ -1,18 +1,34 @@
 ---
-# on localhost, lookup a vm in netbox, and create a DNS record for it
+# on localhost, lookup a vm or dev in netbox, and create a DNS record for it
 # delete incorrect one if exists
 # expects:
-#   vm_name
+#   dev_name
 # sets:
 #   cur_ip
+
 - name: Ask netbox what the IP is
   set_fact:
-    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+vm_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
+    vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+dev_name, api_endpoint=netbox_server, token=netbox_token) }}'
+    dev_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="device="+dev_name, api_endpoint=netbox_server, token=netbox_token) }}'
+  delegate_to: localhost
+
+- name: Set the IP if VM
+  set_fact:
+    assigned_ip_record: '{{ vm_assigned_ip_record[0] }}'
+  when: vm_assigned_ip_record | length > 0
+  delegate_to: localhost
+
+- name: Set the IP if device
+  set_fact:
+    assigned_ip_record: '{{ dev_assigned_ip_record[0] }}'
+  when: dev_assigned_ip_record | length > 0
+  delegate_to: localhost
 
 - name: check for dns
   set_fact:
-    assigned_ip: '{{ vm_assigned_ip_record["value"]["address"].split("/")[0] }}'
-    cur_ip: "{{ lookup('dig', vm_name) }}"
+    assigned_ip: '{{ assigned_ip_record["value"]["address"].split("/")[0] }}'
+    cur_ip: "{{ lookup('dig', dev_name) }}"
+  delegate_to: localhost
 
 - name: show assigned_ip
   debug:
@@ -25,7 +41,7 @@
     key_algorithm: hmac-md5
     server: '{{ dns_list[0] }}'
     zone: '{{ domainname }}'
-    record: '{{ vm_name }}'
+    record: '{{ dev_name }}'
     state: absent
   delegate_to: localhost
   when:
@@ -59,7 +75,7 @@
     key_algorithm: hmac-md5
     server: '{{ dns_list[0] }}'
     zone: '{{ domainname }}'
-    record: '{{ vm_name }}'
+    record: '{{ dev_name }}'
     value: '{{ assigned_ip }}'
   delegate_to: localhost
 
@@ -70,7 +86,7 @@
     key_algorithm: hmac-md5
     server: '{{ dns_list[0] }}'
     type: 'PTR'
-    value: '{{ vm_name }}.{{ domainname }}.'
+    value: '{{ dev_name }}.{{ domainname }}.'
     record: '{{ assigned_ip | ipaddr("revdns") }}'
   delegate_to: localhost
 
@@ -83,3 +99,25 @@
       status: Active
     state: present
   delegate_to: localhost
+
+# - name: Set the primary v4 addr (VM)
+#   netbox.netbox.netbox_virtual_machine:
+#     netbox_url: '{{ netbox_server }}'
+#     netbox_token: '{{ netbox_token }}'
+#     data:
+#       name: '{{ dev_name }}'
+#       primary_ip4: '{{ assigned_ip }}'
+#   register: vm_info_new
+#   delegate_to: localhost
+#   when: vm_assigned_ip_record | length > 0
+
+# - name: Set the primary v4 addr (device)
+#   netbox.netbox.netbox_device:
+#     netbox_url: '{{ netbox_server }}'
+#     netbox_token: '{{ netbox_token }}'
+#     data:
+#       name: '{{ dev_name }}'
+#       primary_ip4: '{{ assigned_ip }}'
+#   register: vm_info_new
+#   delegate_to: localhost
+#   when: dev_assigned_ip_record | length > 0
