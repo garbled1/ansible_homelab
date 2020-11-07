@@ -24,21 +24,21 @@
         netbox_url: '{{ netbox_server }}'
         netbox_token: '{{ netbox_token }}'
         data:
-          virtual_machine: '{{ ip_record[0]["assigned_object"]["virtual_machine"]["name"] }}'
-          name: '{{ ip_record[0]["assigned_object"]["name"] }}'
+          virtual_machine: '{{ ip_record[0]["value"]["assigned_object"]["virtual_machine"]["name"] }}'
+          name: '{{ ip_record[0]["value"]["assigned_object"]["name"] }}'
           mac_address: '{{ mac_of_ip }}'
       when:
         - ip_record | length == 1
-        - ip_record[0]['assigned_object_type'] == 'virtualization.vminterface'
+        - ip_record[0]['value']['assigned_object_type'] == 'virtualization.vminterface'
 
     - name: If device, update the mac on the interface
       netbox.netbox.netbox_device_interface:
         netbox_url: '{{ netbox_server }}'
         netbox_token: '{{ netbox_token }}'
         data:
-          device: '{{ ip_record[0]["assigned_object"]["device"]["name"] }}'
-          name: '{{ ip_record[0]["assigned_object"]["name"] }}'
+          device: '{{ ip_record[0]["value"]["assigned_object"]["device"]["name"] }}'
+          name: '{{ ip_record[0]["value"]["assigned_object"]["name"] }}'
           mac_address: '{{ mac_of_ip }}'
       when:
         - ip_record | length == 1
-        - ip_record[0]['assigned_object_type'] == 'dcim.interface'
+        - ip_record[0]['value']['assigned_object_type'] == 'dcim.interface'
