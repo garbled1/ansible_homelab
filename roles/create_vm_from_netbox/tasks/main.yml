@@ -54,7 +54,7 @@
     netbox_url: '{{ netbox_server }}'
     netbox_token: '{{ netbox_token }}'
     data:
-      name: '{{ vm_name }}'
+      name: '{{ new_vm_name }}'
       status: 'Staged'
   when: vm_record["status"] == "planned"
   delegate_to: localhost

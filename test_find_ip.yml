@@ -1,0 +1,44 @@
+---
+- name: find an ip in netbox and root out its interface, update the MAC
+  hosts: localhost
+  connection: local
+  collections:
+    - netbox.netbox
+  vars_files:
+    - vars/passwords.yml
+  vars:
+    ip_to_find: 192.168.10.9
+    mac_of_ip: '00:0f:53:2e:30:90'
+
+  roles:
+    - network_settings
+
+  tasks:
+
+    - name: hunt for the IP
+      set_fact:
+        ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="address="+ip_to_find, api_endpoint=netbox_server, token=netbox_token) }}'
+
+    - name: if VM, update the mac on this iface
+      netbox.netbox.netbox_vm_interface:
+        netbox_url: '{{ netbox_server }}'
+        netbox_token: '{{ netbox_token }}'
+        data:
+          virtual_machine: '{{ ip_record[0]["assigned_object"]["virtual_machine"]["name"] }}'
+          name: '{{ ip_record[0]["assigned_object"]["name"] }}'
+          mac_address: '{{ mac_of_ip }}'
+      when:
+        - ip_record | length == 1
+        - ip_record[0]['assigned_object_type'] == 'virtualization.vminterface'
+
+    - name: If device, update the mac on the interface
+      netbox.netbox.netbox_device_interface:
+        netbox_url: '{{ netbox_server }}'
+        netbox_token: '{{ netbox_token }}'
+        data:
+          device: '{{ ip_record[0]["assigned_object"]["device"]["name"] }}'
+          name: '{{ ip_record[0]["assigned_object"]["name"] }}'
+          mac_address: '{{ mac_of_ip }}'
+      when:
+        - ip_record | length == 1
+        - ip_record[0]['assigned_object_type'] == 'dcim.interface'
