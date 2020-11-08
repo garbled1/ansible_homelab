@@ -67,6 +67,10 @@
 - name: Sleep for a few seconds
   pause:
     seconds: 30
+  when:
+    - '"NXDOMAIN" not in cur_ip'
+    - cur_ip != ""
+    - cur_ip != assigned_ip
 
 - name: Create forward record
   nsupdate:
