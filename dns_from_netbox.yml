@@ -1,5 +1,5 @@
 ---
-- name: Create a DNS record for a device with IP in netbox
+- name: Create a DNS record for a device with single interface in netbox
   hosts: localhost
   connection: local
   collections:
@@ -9,4 +9,5 @@
 
   roles:
     - network_settings
+    - netbox_new_ip
     - create_dns_from_netbox
