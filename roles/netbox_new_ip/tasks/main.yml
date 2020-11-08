@@ -1,18 +1,27 @@
 ---
 # I expect dev_name
 
-- name: Lookup the device/vm by name
+- name: Lookup the vm by name
   set_fact:
-    dev_record: '{{ query("netbox.netbox.nb_lookup", "interfaces", api_filter="device="+dev_name, api_endpoint=netbox_server, token=netbox_token) | default([]) }}'
-    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtualization-interfaces", api_filter="virtual_machine="+dev_name, api_endpoint=netbox_server, token=netbox_token) | default([]) }}'
-    assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="dns_name__ic="+dev_name, api_endpoint=netbox_server, token=netbox_token) }}'
+    vm_record: '{{ query("netbox.netbox.nb_lookup", "virtualization-interfaces", api_filter="virtual_machine="+dev_name, api_endpoint=netbox_server, token=netbox_token) }}'
   delegate_to: localhost
   ignore_errors: true
+
+- name: Lookup the device by name
+  set_fact:
+    dev_record: '{{ query("netbox.netbox.nb_lookup", "interfaces", api_filter="device="+dev_name, api_endpoint=netbox_server, token=netbox_token) | default([]) }}'
+  delegate_to: localhost
+  ignore_errors: true
+
+- name: Lookup the ip if any
+  set_fact:
+    assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="dns_name__ic="+dev_name, api_endpoint=netbox_server, token=netbox_token) }}'
+  delegate_to: localhost
 
 - name: Fail if too many interfaces
   fail:
     msg: 'Cannot deal with multiple interfaces'
-  when: dev_record | length > 1 or vm_record | length > 1
+  when: dev_record | default([]) | length > 1 or vm_record | default([]) | length > 1
 
 - name: Request a new IP, and assign it to the interface (VM)
   netbox.netbox.netbox_ip_address:
@@ -30,7 +39,7 @@
   register: vm_ip_info
   delegate_to: localhost
   when:
-    - vm_record | length > 0
+    - vm_record | default([]) | length > 0
     - assigned_ip_record|length == 0
 
 - name: Request a new IP, and assign it to the interface (device)
@@ -49,18 +58,18 @@
   register: dev_ip_info
   delegate_to: localhost
   when:
-    - dev_record | length > 0
+    - dev_record | default([]) | length > 0
     - assigned_ip_record|length == 0
 
 - name: Ask netbox what the IP is (VM)
   set_fact:
     vm_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="virtual_machine="+dev_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
-  when: vm_record | length > 0
+  when: vm_record | default([]) | length > 0
 
 - name: Ask netbox what the IP is (device)
   set_fact:
     dev_assigned_ip_record: '{{ query("netbox.netbox.nb_lookup", "ip-addresses", api_filter="device="+dev_name, api_endpoint=netbox_server, token=netbox_token)[0] }}'
-  when: vm_record | length > 0
+  when: vm_record | default([]) | length > 0
 
 # - name: Set the primary v4 addr (VM)
 #   netbox.netbox.netbox_virtual_machine:
@@ -71,7 +80,7 @@
 #       primary_ip4: '{{ vm_assigned_ip_record["value"]["address"].split("/")[0] }}'
 #   register: vm_info_new
 #   delegate_to: localhost
-#   when: vm_record | length > 0
+#   when: vm_record | default([]) | length > 0
 
 # - name: Set the primary v4 addr (device)
 #   netbox.netbox.netbox_device:
@@ -82,4 +91,4 @@
 #       primary_ip4: '{{ dev_assigned_ip_record["value"]["address"].split("/")[0] }}'
 #   register: vm_info_new
 #   delegate_to: localhost
-#   when: vm_record | length > 0
+#   when: vm_record | default([]) | length > 0
