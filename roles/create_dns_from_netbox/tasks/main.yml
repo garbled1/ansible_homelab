@@ -101,6 +101,8 @@
     data:
       address: '{{ assigned_ip }}'
       status: Active
+      prefix: '{{ netbox_prefix }}'
+      vrf: '{{ netbox_vrf }}'
     state: present
   delegate_to: localhost
 
