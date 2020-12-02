@@ -1,1 +1,1 @@
-getty|autovt|systemd-fsck-root|systemd-timesyncd
+getty|autovt|systemd-fsck-root|systemd-timesyncd|dbus-org.freedesktop.timesync1
