@@ -10,7 +10,7 @@
 
     - name: grab foo
       local_action:
-        module: zabbix_host
+        module: zabbix_host_info
         host_name: '{{ inventory_hostname_short }}'
         login_password: '{{ zabbix_pw }}'
         login_user: Admin
