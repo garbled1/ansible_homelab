@@ -52,7 +52,7 @@
     path: /var/log/loki
     owner: loki
     group: loki
-    mode: 0664
+    mode: 0775
   when: install_promtail
 
 - name: fetch promtail (arm)
