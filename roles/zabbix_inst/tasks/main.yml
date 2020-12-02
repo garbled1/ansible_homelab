@@ -79,18 +79,7 @@
         login_password: '{{ zabbix_pw }}'
         login_user: Admin
         server_url: 'http://{{ zabbix_server }}/'
-        host_groups:
-          - '{{ lxc_or_vm }}'
-          - Linux servers
         link_templates: '{{ base_templates | union(template_list) }}'
-        interfaces:
-          - type: 1
-            main: 1
-            useip: 1
-            ip: '{{ ansible_default_ipv4.address }}'
-            dns: '{{ inventory_hostname_short }}'
-            port: 10050
-        inventory_mode: automatic
       when: add_zabbix_host
       ignore_errors: true
 
