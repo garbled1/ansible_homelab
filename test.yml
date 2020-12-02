@@ -11,7 +11,7 @@
     - name: grab foo
       local_action:
         module: zabbix_host_info
-        host_name: 'xxx{{ inventory_hostname_short }}'
+        host_name: '{{ inventory_hostname_short }}'
         login_password: '{{ zabbix_pw }}'
         login_user: Admin
         server_url: 'http://{{ zabbix_server }}/'
@@ -19,3 +19,11 @@
 
     - debug:
         var: stuff
+
+    - name: Build a list of existing templates
+      set_fact:
+        template_list: "{{ template_list | default([]) }} + [ '{{ item['name'] }}' ]"
+      with_items: "{{ stuff['hosts'][0]['parentTemplates'] }}"
+
+    - debug:
+        var: template_list
