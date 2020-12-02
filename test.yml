@@ -1,43 +1,21 @@
-- name: Do local
-  hosts: localhost
-  connection: local
-  collections:
-    - netbox.netbox
-    - community.general
+---
+- name: Perform maintenance as needed
+  hosts: all
   vars_files:
     - vars/passwords.yml
-  vars:
-    vm_cpu: 1
-    vm_mem: 1024
-    clone_id: 113
-    template_name: debian-buster-tmpl
-    storage_name: vm_rbd
-    new_vm_name: antares
-    target_node: alphard
+  roles:
+    - network_settings
 
   tasks:
 
-    - name: tweak settings
-      community.general.proxmox_kvm:
-        api_user: root@pam
-        api_password: '{{ proxmox_pass }}'
-        api_host: '{{ target_node }}'
-        name: '{{ new_vm_name }}'
-        node: '{{ target_node }}'
-        cores: '{{ vm_cpu }}'
-        memory: '{{ vm_mem }}'
-        update: true
+    - name: grab foo
+      local_action:
+        module: zabbix_host
+        host_name: '{{ inventory_hostname_short }}'
+        login_password: '{{ zabbix_pw }}'
+        login_user: Admin
+        server_url: 'http://{{ zabbix_server }}/'
       register: stuff
 
     - debug:
         var: stuff
-
-# - name: test far
-#   hosts: fizz
-#   tasks:
-#     - name: hello
-#       command: uname -a
-
-#     - name: hello self
-#       command: uname -a
-#       delegate_to: localhost
