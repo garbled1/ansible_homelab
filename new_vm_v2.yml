@@ -180,6 +180,8 @@
     - pm_cli
     - ntp
     - rsyslog
+    - postfix_internal
+    - fstrim
 
   post_tasks:
     - name: push the key
