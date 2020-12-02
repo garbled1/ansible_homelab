@@ -56,26 +56,64 @@
     name: zabbix-agent
     state: restarted
 
-- name: Add to zabbix
-  local_action:
-    module: zabbix_host
-    host_name: '{{ inventory_hostname_short }}'
-    login_password: '{{ zabbix_pw }}'
-    login_user: Admin
-    server_url: 'http://{{ zabbix_server }}/'
-    host_groups:
-      - '{{ lxc_or_vm }}'
-      - Linux servers
-    link_templates:
-      - Template OS Linux
-      - SystemD service monitoring template
-    interfaces:
-      - type: 1
-        main: 1
-        useip: 1
-        ip: '{{ ansible_default_ipv4.address }}'
-        dns: '{{ inventory_hostname_short }}'
-        port: 10050
-    inventory_mode: automatic
-  when: add_zabbix_host
-  ignore_errors: true
+- name: zabbix add block
+  block:
+    - name: ask zabbix if we have a host
+      local_action:
+        module: zabbix_host_info
+        host_name: '{{ inventory_hostname_short }}'
+        login_password: '{{ zabbix_pw }}'
+        login_user: Admin
+        server_url: 'http://{{ zabbix_server }}/'
+      register: host_data
+
+    - name: Build a list of existing templates
+      set_fact:
+        template_list: "{{ template_list | default([]) }} + [ '{{ item['name'] }}' ]"
+      with_items: "{{ host_data['hosts'][0]['parentTemplates'] }}"
+
+    - name: Add to zabbix
+      local_action:
+        module: zabbix_host
+        host_name: '{{ inventory_hostname_short }}'
+        login_password: '{{ zabbix_pw }}'
+        login_user: Admin
+        server_url: 'http://{{ zabbix_server }}/'
+        host_groups:
+          - '{{ lxc_or_vm }}'
+          - Linux servers
+        link_templates: '{{ base_templates | union(template_list) }}'
+        interfaces:
+          - type: 1
+            main: 1
+            useip: 1
+            ip: '{{ ansible_default_ipv4.address }}'
+            dns: '{{ inventory_hostname_short }}'
+            port: 10050
+        inventory_mode: automatic
+      when: add_zabbix_host
+      ignore_errors: true
+
+  rescue:
+
+    - name: Add to zabbix
+      local_action:
+        module: zabbix_host
+        host_name: '{{ inventory_hostname_short }}'
+        login_password: '{{ zabbix_pw }}'
+        login_user: Admin
+        server_url: 'http://{{ zabbix_server }}/'
+        host_groups:
+          - '{{ lxc_or_vm }}'
+          - Linux servers
+        link_templates: '{{ base_templates }}'
+        interfaces:
+          - type: 1
+            main: 1
+            useip: 1
+            ip: '{{ ansible_default_ipv4.address }}'
+            dns: '{{ inventory_hostname_short }}'
+            port: 10050
+        inventory_mode: automatic
+      when: add_zabbix_host
+      ignore_errors: true

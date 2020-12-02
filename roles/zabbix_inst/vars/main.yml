@@ -1,0 +1,4 @@
+---
+base_templates:
+  - Template OS Linux
+  - SystemD service monitoring template
