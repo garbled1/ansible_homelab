@@ -1,0 +1,39 @@
+---
+- name: create dir for override
+  file:
+    state: directory
+    path: /etc/systemd/system/fstrim.timer.d
+    owner: root
+    group: root
+    mode: 0755
+  when: inventory_hostname in groups['tags_discard']
+
+- name: Create override
+  copy:
+    dest: /etc/systemd/system/fstrim.timer.d/override.conf
+    owner: root
+    group: root
+    mode: 0755
+    content: |
+      [Timer]
+      RandomizedDelaySec=6d
+  when: inventory_hostname in groups['tags_discard']
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+  when: inventory_hostname in groups['tags_discard']
+
+- name: enable fstrim.service
+  systemd:
+    name: fstrim.service
+    state: started
+    enabled: true
+  when: inventory_hostname in groups['tags_discard']
+
+- name: enable fstrim.timer
+  systemd:
+    name: fstrim.timer
+    state: started
+    enabled: true
+  when: inventory_hostname in groups['tags_discard']
