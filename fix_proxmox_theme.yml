@@ -1,0 +1,9 @@
+- hosts: all
+  vars_files:
+    - vars/passwords.yml
+  vars:
+    lxc_or_vm: ProxMox
+
+  roles:
+    - network_settings
+    - proxmox_theme

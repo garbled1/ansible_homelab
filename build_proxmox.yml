@@ -8,6 +8,7 @@
     - network_settings
     - migrate_sources
     - proxmox_server
+    - proxmox_theme
     - rsyslog
     - install_promtail
     - pm_cli
