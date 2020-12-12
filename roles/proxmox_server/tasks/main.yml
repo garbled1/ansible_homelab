@@ -3,7 +3,7 @@
   copy:
     dest: /etc/apt/sources.list.d/ceph.list
     content: |
-      deb http://download.proxmox.com/debian/ceph-nautilus buster main
+      deb http://download.proxmox.com/debian/ceph-octopus buster main
 
 - name: pve-no-subscription
   copy:
