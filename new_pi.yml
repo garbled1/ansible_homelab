@@ -1,0 +1,36 @@
+---
+- name: Setup a new PI
+  hosts: rpi
+  vars_files:
+    - vars/passwords.yml
+  roles:
+    - network_settings
+    - rsyslog
+    - migrate_sources
+    - vm_setup
+    - pm_cli
+    - role: postfix_internal
+      when: inventory_hostname not in groups['tags_mailserver']
+    - role: debian_unatt_upg
+      when: inventory_hostname in groups['tags_autoupdate']
+    - zabbix_inst
+    - role: fstrim
+      when: inventory_hostname in groups['tags_discard']
+
+  tasks:
+    - name: run pmcli
+      command: /usr/sbin/patchman-client
+
+    - name: create userparam_rpi for zabbix
+      copy:
+        dest: /etc/zabbix/zabbix_agentd.conf.d/userparameter_rpi.conf
+        owner: root
+        group: root
+        mode: 0644
+        content: |
+          UserParameter=rpi.cpuTemperature,cat /sys/class/thermal/thermal_zone0/temp
+
+    - name: restart zabbix
+      service:
+        name: zabbix-agent
+        state: restarted
