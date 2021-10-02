@@ -76,6 +76,7 @@
       copy:
         src: '/etc/php/7.3/fpm/{{ item }}'
         dest: /var/backups/
+        remote_src: true
       with_items:
         - php.ini
         - php-fpm.conf
