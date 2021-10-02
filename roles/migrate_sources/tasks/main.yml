@@ -25,7 +25,7 @@
 - name: Create /etc/apt/sources.list.d/approx.list (x86_64)
   copy:
     src: files/approx.list
-    dest: /etc/apt/sources.list.d/approx.list
+    dest: '/etc/apt/sources.list.d/approx{{ ansible_distribution_major_version }}.list'
     owner: root
     group: root
     mode: 0644

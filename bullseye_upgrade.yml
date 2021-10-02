@@ -1,0 +1,82 @@
+- hosts: all
+  vars_files:
+    - vars/passwords.yml
+  vars:
+    lxc_or_vm: VM
+  roles:
+    - network_settings
+
+  tasks:
+    - name: backup dpkg selections
+      shell: 'dpkg --get-selections "*" >/var/backups/dpkg_selections.out'
+
+    - name: find all the files in sources.list.d
+      find:
+        paths: /etc/apt/sources.list.d
+        recurse: no
+        file_type: file
+      register: apt_sources
+
+    - name: create apt backup dir
+      file:
+        state: directory
+        path: '/var/backups/apt.sources.list'
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: backup
+      archive:
+        path: /etc/apt/sources.list.d/
+        dest: /var/backups/apt.sources.list/orig.tgz
+
+    - name: test
+      debug:
+        var: apt_sources['files'] | map(attribute='path') | list
+
+    - name: set preserve list
+      set_fact:
+        apt_preserve_list: "{{ apt_sources['files'] | map(attribute='path') | list | reject('match', '/etc/apt/sources.list.d/sources.list') | list }}"
+
+    - name: debug
+      debug:
+        var: apt_preserve_list
+
+    - name: apt update
+      apt:
+        update_cache: yes
+        upgrade: "yes"
+
+    - name: remove and backup apt sources.list.d
+      archive:
+        path: '{{ apt_preserve_list }}'
+        dest: /var/backups/apt.sources.list/save.tgz
+        remove: yes
+
+    - name: replace sources.list
+      copy:
+        dest: /etc/apt/sources.list.d/sources.list
+        owner: root
+        group: root
+        mode: 0644
+        content: |
+          deb http://ftp.debian.org/debian bullseye main contrib
+          deb http://ftp.debian.org/debian bullseye-updates main contrib
+          deb http://security.debian.org bullseye-security main contrib
+    
+    - name: install approx cache
+      copy:
+        src: roles/migrate_sources/files/approx11.list
+        dest: /etc/apt/sources.list.d/approx.list
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: backup php73 ini if it exists
+      copy:
+        src: '/etc/php/7.3/fpm/{{ item }}'
+        dest: /var/backups/
+      with_items:
+        - php.ini
+        - php-fpm.conf
+      ignore_errors: true
