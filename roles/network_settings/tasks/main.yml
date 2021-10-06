@@ -24,7 +24,7 @@
 - name: ip / name of primary ntp
   set_fact:
     ntp_ip: '{{ ntp_service_dev.value.primary_ip4.address | ipaddr("address") }}'
-    ntp_name: '{{ ntp_service_dev.value.device.name + "." + domainname }}'
+    ntp_name: '{{ ntp_service_dev.value.name + "." + domainname }}'
 
 - name: Lookup the iDNS service
   collections:
