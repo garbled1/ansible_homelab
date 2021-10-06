@@ -59,4 +59,4 @@
   collections:
     - netbox.netbox
   set_fact:
-    internal_relay_port: '{{ (query("netbox.netbox.nb_lookup", "services", api_filter="name=internal_relay", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.port") | list)[0] }}'
+    internal_relay_port: '{{ (query("netbox.netbox.nb_lookup", "services", api_filter="name=internal_relay", api_endpoint=netbox_server, token=netbox_token) | map(attribute="value.ports")[0] }}'
