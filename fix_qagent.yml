@@ -1,0 +1,9 @@
+---
+- name: Recycle qemu agent
+  hosts: linuxvm
+  tasks:
+
+    - name: recycle agent
+      systemd:
+        name: qemu-guest-agent.service
+        state: restarted
