@@ -14,3 +14,8 @@
           systemd:
             name: nut-driver
             state: restarted
+
+    - name: Ensure nut-server is running
+      systemd:
+        name: nut-server
+        state: started
