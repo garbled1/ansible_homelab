@@ -1,9 +1,9 @@
 ---
 - name: Download the dark theme
   get_url:
-    url: https://raw.githubusercontent.com/Weilbyte/PVEDiscordDark/master/PVEDiscordDark.py
-    dest: /root/PVEDiscordDark.py
+    url: https://raw.githubusercontent.com/Weilbyte/PVEDiscordDark/master/PVEDiscordDark.sh
+    dest: /root/PVEDiscordDark.sh
     mode: '0755'
 
 - name: Install theme
-  command: python3 /root/PVEDiscordDark.py --action install
+  command: /root/PVEDiscordDark.py install
