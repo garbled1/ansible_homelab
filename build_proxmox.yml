@@ -3,6 +3,7 @@
     - vars/passwords.yml
   vars:
     lxc_or_vm: ProxMox
+    ansible_python_interpreter: /usr/bin/python3
 
   roles:
     - network_settings
