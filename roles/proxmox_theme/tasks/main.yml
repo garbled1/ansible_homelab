@@ -6,4 +6,4 @@
     mode: '0755'
 
 - name: Install theme
-  command: /root/PVEDiscordDark.py install
+  command: /root/PVEDiscordDark.sh install
