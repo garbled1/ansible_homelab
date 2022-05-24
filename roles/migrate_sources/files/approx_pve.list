@@ -1,3 +1,3 @@
-deb http://taika.garbled.net:9999/ceph-octopus buster main
-deb http://taika.garbled.net:9999/ceph-pacific buster main
+# deb http://taika.garbled.net:9999/ceph-octopus buster main
+# deb http://taika.garbled.net:9999/ceph-pacific buster main
 deb http://taika.garbled.net:9999/proxmox bullseye pve-no-subscription
