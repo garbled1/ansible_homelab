@@ -16,6 +16,55 @@
     path: /etc/apt/sources.list.d/pve-enterprise.list
     state: absent
 
+- name: pvestatus.cfg
+  copy:
+    dest: /tmp/status.cfg
+    src: files/status.cfg
+    mode: 0644
+
+- name: Copy pvestatus.cfg into place
+  command: cp /tmp/status.cfg /etc/pve/status.cfg
+
+- name: Force apt to allow releasinfo changes
+  command: apt-get update --allow-releaseinfo-change
+  args:
+    warn: false
+
+- name: apt update
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: install the minimum stuff
+  package:
+    name:
+      - curl
+      - net-tools
+      - tcpdump
+      - dnsutils
+
+- name: Install the things we need for proxmox
+  package:
+    name:
+      - ipmitool
+      - nut
+      - ifupdown2
+      - python3-influxdb
+      - iperf3
+      - fio
+
+- name: Need uidmap for taika
+  lineinfile:
+    path: /etc/subuid
+    line: 'root:2001:2'
+    insertafter: EOF
+
+- name: Need gidmap for taika
+  lineinfile:
+    path: /etc/subgid
+    line: 'root:2001:2'
+    insertafter: EOF
+
 - name: install zabbix
   package:
     name: zabbix-agent
@@ -76,49 +125,3 @@
     owner: root
     group: root
     mode: 0600
-
-- name: pvestatus.cfg
-  copy:
-    dest: /tmp/status.cfg
-    src: files/status.cfg
-    mode: 0644
-
-- name: Copy pvestatus.cfg into place
-  command: cp /tmp/status.cfg /etc/pve/status.cfg
-
-- name: Force apt to allow releasinfo changes
-  command: apt-get update --allow-releaseinfo-change
-  args:
-    warn: false
-
-- name: apt update
-  apt:
-    update_cache: yes
-    upgrade: yes
-
-- name: install the minimum stuff
-  package:
-    name:
-      - curl
-      - net-tools
-      - tcpdump
-      - dnsutils
-
-- name: Install the things we need for proxmox
-  package:
-    name:
-      - ipmitool
-      - nut
-      - ifupdown2
-
-- name: Need uidmap for taika
-  lineinfile:
-    path: /etc/subuid
-    line: 'root:2001:2'
-    insertafter: EOF
-
-- name: Need gidmap for taika
-  lineinfile:
-    path: /etc/subgid
-    line: 'root:2001:2'
-    insertafter: EOF
