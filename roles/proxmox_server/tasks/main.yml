@@ -52,6 +52,8 @@
       - python3-influxdb
       - iperf3
       - fio
+      - libgl1
+      - libegl1
 
 - name: Need uidmap for taika
   lineinfile:
