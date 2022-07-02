@@ -1,0 +1,2 @@
+deb http://taika.garbled.net:9999/raspbian/ bullseye main contrib non-free rpi
+deb http://taika.garbled.net:9999/raspbian_archive/ bullseye main

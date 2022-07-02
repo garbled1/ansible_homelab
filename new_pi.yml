@@ -1,6 +1,16 @@
 ---
 - name: Setup a new PI
-  hosts: rpi
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Create an inventory for the target server
+      add_host:
+        name: '{{ new_vm_name }}'
+        groups: target
+
+- name: Setup a new PI
+  hosts: target
   vars_files:
     - vars/passwords.yml
   roles:
