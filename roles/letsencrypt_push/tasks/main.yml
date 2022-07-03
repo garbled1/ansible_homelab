@@ -24,6 +24,11 @@
     path: /etc/pmg
   register: has_pmg
 
+- name: check for proxmox-backup
+  stat:
+    path: /etc/proxmox-backup
+  register: has_proxmox_backup
+
 - name: check for dovecot
   stat:
     path: /etc/dovecot
@@ -135,6 +140,14 @@
     state: reloaded
   when:
     - "'proxmox' in group_names"
+    - pushed_certs is changed
+
+- name: reload proxmox-backup-proxy
+  systemd:
+    name: proxmox-backup-proxy
+    state: reloaded
+  when:
+    - has_proxmox_backup.stat.exists
     - pushed_certs is changed
 
 # Now deal with FreeNAS
