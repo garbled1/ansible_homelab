@@ -18,6 +18,7 @@
         owner: root
         group: root
         mode: 0644
+      register: gpg_file
 
     - name: place pbs-client.list on debian x86
       copy:
@@ -27,11 +28,13 @@
         mode: 0644
         content: |
           deb http://download.proxmox.com/debian/pbs-client bullseye main
+      register: pcl_file
 
     - name: Force apt to allow releasinfo changes on debian x86
       command: apt-get update --allow-releaseinfo-change
       args:
         warn: false
+      when: pcl_file is changed or gpg_file is changed
 
     - name: Install proxmox-backup-client on debian x86
       package:

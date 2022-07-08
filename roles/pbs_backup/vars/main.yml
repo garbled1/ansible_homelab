@@ -1,8 +1,8 @@
 ---
 pbs_binary_tar:
-  arm: proxmox-backup-client-v2.1.5-arm32v7.tgz
+  armv7l: proxmox-backup-client-v2.1.5-arm32v7.tgz
   aarch64: proxmox-backup-client-v2.1.5-arm64v8.tgz
 pbs_client_file:
-  arm: /usr/local/proxmox-backup-client-v2.1.5/proxmox-backup-client.sh
+  armv7l: /usr/local/proxmox-backup-client-v2.1.5/proxmox-backup-client.sh
   aarch64: /usr/local/proxmox-backup-client-v2.1.5/proxmox-backup-client.sh
   x86_64: /usr/bin/proxmox-backup-client
