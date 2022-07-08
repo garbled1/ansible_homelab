@@ -1,0 +1,16 @@
+#!/bin/bash
+export PBS_PASSWORD="{{ pbs_password }}"
+export PBS_FINGERPRINT="{{ pbs_fingerprint }}"
+glom=""
+glomb=""
+for fs in $(mount -v -t ext4,fuse,vfat,zfs | awk '{print $3}')
+do
+    if [ "$fs" == "/" ]; then
+	pxar=root
+    else
+	pxar=$(echo $fs | sed -e 's@^/@@' -e 's@/@_@g')
+    fi
+    glom="${glom} ${pxar}.pxar:${fs}"
+    glomb="${glomb} --include-dev ${fs}"
+done
+{{ pbs_client_file[ansible_machine] }} backup ${glom} ${glomb} --repository pbs.garbled.net:backup {{ ansible_machine == 'x86_64' | ternary('--ns Physical', '') }}

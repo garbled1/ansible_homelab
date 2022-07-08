@@ -1,0 +1,77 @@
+---
+- name: Copy the nightly script into place
+  template:
+    src: templates/pbc_nightly.sh.j2
+    dest: /usr/local/bin/pbc_nightly.sh
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Client install on debian x86
+  block:
+
+    - name: Install gpg on debian x86
+      get_url:
+        url: https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg
+        dest: /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
+        checksum: sha256:7fb03ec8a1675723d2853b84aa4fdb49a46a3bb72b9951361488bfd19b29aab0a789a4f8c7406e71a69aabbc727c936d3549731c4659ffa1a08f44db8fdcebfa
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: place pbs-client.list on debian x86
+      copy:
+        dest: /etc/apt/sources.list.d/pbs-client.list
+        owner: root
+        group: root
+        mode: 0644
+        content: |
+          deb http://download.proxmox.com/debian/pbs-client bullseye main
+
+    - name: Force apt to allow releasinfo changes on debian x86
+      command: apt-get update --allow-releaseinfo-change
+      args:
+        warn: false
+
+    - name: Install proxmox-backup-client on debian x86
+      package:
+        name:
+          - proxmox-backup-client
+  when:
+    - "'x86_64' in ansible_machine"
+    - ansible_distribution_major_version == '11'
+    - ansible_distribution == 'Debian'
+
+- name: Client install on raspbian
+  block:
+
+    - name: untar release
+      unarchive:
+        src: '{{ pbs_file_storage }}/{{ pbs_binary_tar[ansible_machine] }}'
+        dest: /usr/local
+
+  when:
+    - ansible_machine == 'arm' or ansible_machine == 'aarch64'
+    - ansible_distribution == 'Debian'
+
+- name: install cronjob
+  cron:
+    name: pbs backup
+    weekday: "*/3"
+    minute: "{{ 59|random(seed=inventory_hostname) }}"
+    hour: "2"
+    user: root
+    job: /usr/local/bin/pbc_nightly.sh >/dev/null 2>&1
+    cron_file: proxmox_backup_client
+
+- name: fix shell for cronfile
+  name: SHELL
+  job: /bin/bash
+  env: yes
+  cron_file: proxmox_backup_client
+
+- name: set path for cronfile
+  name: PATH
+  job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+  env: yes
+  cron_file: proxmox_backup_client

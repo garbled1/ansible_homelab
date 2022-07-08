@@ -1,0 +1,10 @@
+---
+- name: configure backups on servers
+  hosts: tags_backup
+  collections:
+    - netbox.netbox
+  vars_files:
+    - vars/passwords.yml
+
+  roles:
+    - pbs_backup
