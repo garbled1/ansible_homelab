@@ -70,6 +70,7 @@
     job: /bin/bash
     env: yes
     cron_file: proxmox_backup_client
+    user: root
 
 - name: set path for cronfile
   cron:
@@ -77,3 +78,4 @@
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
     env: yes
     cron_file: proxmox_backup_client
+    user: root
