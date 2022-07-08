@@ -66,12 +66,12 @@
 
 - name: fix shell for cronfile
   name: SHELL
-  job: /bin/bash
+  value: /bin/bash
   env: yes
   cron_file: proxmox_backup_client
 
 - name: set path for cronfile
   name: PATH
-  job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+  value: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
   env: yes
   cron_file: proxmox_backup_client
