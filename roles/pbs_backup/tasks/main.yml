@@ -14,7 +14,7 @@
       get_url:
         url: https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg
         dest: /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
-        checksum: md5sum:bcc35c7173e0845c0d6ad6470b70f50e
+        checksum: md5:bcc35c7173e0845c0d6ad6470b70f50e
         owner: root
         group: root
         mode: 0644
