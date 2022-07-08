@@ -13,4 +13,4 @@ do
     glom="${glom} ${pxar}.pxar:${fs}"
     glomb="${glomb} --include-dev ${fs}"
 done
-{{ pbs_client_file[ansible_machine] }} backup ${glom} ${glomb} --repository pbs.garbled.net:backup {{ ansible_machine == 'x86_64' | ternary('--ns Physical', '') }}
+{{ pbs_client_file[ansible_machine] }} backup ${glom} ${glomb} --repository pbs.garbled.net:backup {% if ansible_machine == 'x86_64' %} --ns Physical{% endif %}
