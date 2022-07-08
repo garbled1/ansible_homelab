@@ -61,17 +61,19 @@
     minute: "{{ 59|random(seed=inventory_hostname) }}"
     hour: "2"
     user: root
-    job: /usr/local/bin/pbc_nightly.sh >/dev/null 2>&1
+    job: '/usr/local/bin/pbc_nightly.sh >/dev/null 2>&1'
     cron_file: proxmox_backup_client
 
 - name: fix shell for cronfile
-  name: SHELL
-  value: /bin/bash
-  env: yes
-  cron_file: proxmox_backup_client
+  cron:
+    name: SHELL
+    job: /bin/bash
+    env: yes
+    cron_file: proxmox_backup_client
 
 - name: set path for cronfile
-  name: PATH
-  value: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-  env: yes
-  cron_file: proxmox_backup_client
+  cron:
+    name: PATH
+    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+    env: yes
+    cron_file: proxmox_backup_client
