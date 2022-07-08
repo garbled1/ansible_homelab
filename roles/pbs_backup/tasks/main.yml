@@ -54,6 +54,11 @@
     - ansible_machine == 'arm' or ansible_machine == 'aarch64'
     - ansible_distribution == 'Debian'
 
+- name: get rid of old cron
+  file:
+    path: /etc/cron.d/proxmox_backup_client
+    state: absent
+
 - name: install cronjob
   cron:
     name: pbs backup
@@ -62,14 +67,14 @@
     hour: "2"
     user: root
     job: '/usr/local/bin/pbc_nightly.sh >/dev/null 2>&1'
-    cron_file: proxmox_backup_client
+    cron_file: pbs_nightly_backup
 
 - name: fix shell for cronfile
   cron:
     name: SHELL
     job: /bin/bash
     env: yes
-    cron_file: proxmox_backup_client
+    cron_file: pbs_nightly_backup
     user: root
 
 - name: set path for cronfile
@@ -77,5 +82,5 @@
     name: PATH
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
     env: yes
-    cron_file: proxmox_backup_client
+    cron_file: pbs_nightly_backup
     user: root
