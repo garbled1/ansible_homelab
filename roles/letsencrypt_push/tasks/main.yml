@@ -157,7 +157,7 @@
     state: directory
     path: /etc/pki
     owner: root
-    group: wheel
+    group: root
     mode: 0755
   when: "'platforms_FreeNAS' in group_names"
 
@@ -166,7 +166,7 @@
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
     owner: root
-    group: wheel
+    group: root
     mode: '{{ item.mode }}'
   with_items:
     - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
@@ -180,6 +180,12 @@
       mode: '0644'
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '/etc/certificates/freenas_default.key'
+      mode: '0400'
+    - src: '{{ keydir }}/{{ cert_name }}.chained.cert'
+      dest: '/etc/certificates/truenas_default.crt'
+      mode: '0644'
+    - src: '{{ keydir }}/{{ cert_name }}.key'
+      dest: '/etc/certificates/truenas_default.key'
       mode: '0400'
   when: "'platforms_FreeNAS' in group_names"
 

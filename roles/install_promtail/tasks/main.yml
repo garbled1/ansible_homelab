@@ -14,9 +14,9 @@
     path: /var/log/pmgproxy
   register: has_pmg
 
-- name: Check for postgres12
+- name: Check for postgres13
   stat:
-    path: /u1/pgsql/12/main/log
+    path: /u1/pgsql/13/main/log
   register: has_postgres
 
 - name: Check for mysql
