@@ -205,17 +205,17 @@
       mode: '0600'
   when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
-- name: Restart nginx
+- name: Restart nginx (FreeNAS)
   service:
     name: nginx
     state: reloaded
-  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names or force_push == 'force'"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
-- name: Restart minio
+- name: Restart minio (FreeNAS)
   service:
     name: minio
     state: restarted
-  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names or force_push == 'force'"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
 - name: Install pmgproxy cert
   copy:
