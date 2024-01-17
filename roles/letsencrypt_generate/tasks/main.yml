@@ -57,7 +57,9 @@
     key_secret: "{{ extdns_dyndns_key }}"
     key_algorithm: hmac-md5
     key_name: dyndns-key
-    server: 'dns.{{ domainname }}'
+    # server: 'dns.{{ domainname }}'
+    # FIX LATER with collection
+    server: '192.168.10.24'
     zone: "{{ nsupdate_zone }}"
     record: "_acme-challenge.{{ nsupdate_zone }}."
     value: "{{ item.value }}"
