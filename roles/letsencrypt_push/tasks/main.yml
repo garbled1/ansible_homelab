@@ -101,7 +101,7 @@
   when:
     - "'webservers' in group_names"
     - has_nginx.stat.exists
-    - pushed_certs is changed
+    - 'pushed_certs is changed or force_push == "force"'
 
 # Now push me to the proxmox servers
 
@@ -132,7 +132,7 @@
     - pveproxy-ssl.key
   when:
     - "'proxmox' in group_names"
-    - pushed_certs_prox is changed
+    - 'pushed_certs_prox is changed or force_push == "force"'
   
 - name: reload pveproxy
   systemd:
@@ -140,7 +140,7 @@
     state: reloaded
   when:
     - "'proxmox' in group_names"
-    - pushed_certs_prox is changed
+    - 'pushed_certs_prox is changed or force_push == "force"'
 
 - name: reload proxmox-backup-proxy
   systemd:
@@ -148,7 +148,7 @@
     state: reloaded
   when:
     - has_proxmox_backup.stat.exists
-    - pushed_certs is changed
+    - 'pushed_certs is changed or force_push == "force"'
 
 # Now deal with FreeNAS
 
@@ -209,13 +209,13 @@
   service:
     name: nginx
     state: reloaded
-  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names or force_push == 'force'"
 
 - name: Restart minio
   service:
     name: minio
     state: restarted
-  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names or force_push == 'force'"
 
 - name: Install pmgproxy cert
   copy:
@@ -234,7 +234,7 @@
     state: reloaded
   when:
     - has_pmg.stat.exists
-    - pushed_pmgcert is changed
+    - 'pushed_pmgcert is changed or force_push == "force"'
 
 - name: restart dovecot
   systemd:
@@ -242,5 +242,5 @@
     state: reloaded
   when:
     - has_dovecot.stat.exists
-    - pushed_certs is changed
+    - 'pushed_certs is changed or force_push == "force"'
 
