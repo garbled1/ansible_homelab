@@ -8,7 +8,7 @@
     - letsencrypt_generate
 
 - name: Now push me to everyone who cares
-  hosts: webservers,proxmox,platforms_FreeNAS,tags_pmgproxy,tags_pbs
+  hosts: webservers,proxmox,platforms_freenas,tags_pmgproxy,tags_pbs
   vars_files:
     - vars/passwords.yml
   roles:

@@ -92,7 +92,7 @@
       mode: '0644'
   register: pushed_certs
   when:
-    - "'webservers' in group_names"
+    - "'webservers' in group_names or 'pbs' in group_names"
 
 - name: reload nginx
   systemd:
@@ -119,7 +119,7 @@
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: /root/pveproxy-ssl.key
       mode: '0640'
-  register: pushed_certs
+  register: pushed_certs_prox
   when:
     - "'proxmox' in group_names"
 
@@ -132,7 +132,7 @@
     - pveproxy-ssl.key
   when:
     - "'proxmox' in group_names"
-    - pushed_certs is changed
+    - pushed_certs_prox is changed
   
 - name: reload pveproxy
   systemd:
@@ -140,7 +140,7 @@
     state: reloaded
   when:
     - "'proxmox' in group_names"
-    - pushed_certs is changed
+    - pushed_certs_prox is changed
 
 - name: reload proxmox-backup-proxy
   systemd:
@@ -159,7 +159,7 @@
     owner: root
     group: root
     mode: 0755
-  when: "'platforms_FreeNAS' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
 - name: push some certs to FreeNAS
   copy:
@@ -187,7 +187,7 @@
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '/etc/certificates/truenas_default.key'
       mode: '0400'
-  when: "'platforms_FreeNAS' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
 - name: push some certs to FreeNAS-minio
   copy:
@@ -203,22 +203,23 @@
     - src: '{{ keydir }}/{{ cert_name }}.key'
       dest: '/usr/local/etc/minio/certs/private.key'
       mode: '0600'
-  when: "'platforms_FreeNAS' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
 - name: Restart nginx
   service:
     name: nginx
     state: reloaded
-  when: "'platforms_FreeNAS' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
 - name: Restart minio
   service:
     name: minio
     state: restarted
-  when: "'platforms_FreeNAS' in group_names"
+  when: "'platforms_FreeNAS' in group_names or 'platforms_freenas' in group_names"
 
 - name: Install pmgproxy cert
   copy:
+    # generated in letsencrypt_generate
     src: '{{ keydir }}/{{ cert_name }}.concat.cert'
     dest: /etc/pmg/pmg-api.pem
     owner: root

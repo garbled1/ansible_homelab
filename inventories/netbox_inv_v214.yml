@@ -1,0 +1,21 @@
+plugin: netbox.netbox.nb_inventory
+api_endpoint: http://fafnir.garbled.net/
+validate_certs: false
+config_context: False
+query_filters:
+  - role: server
+  - role: rpi
+  - status: active
+group_by:
+  - platforms
+  - device_roles
+  - tags
+groups:
+  linux: "'debian' in platforms or 'raspbian' in platforms or 'proxmox' in platforms"
+  webservers: "'webservers' in tags"
+  rpi: "'raspbian' in platforms"
+  proxmox: "'proxmox' in platforms"
+  linuxvm: "'vm' in tags and 'debian' in platforms"
+compose:
+  status: status.value
+#token: '{{ my_token }}'
