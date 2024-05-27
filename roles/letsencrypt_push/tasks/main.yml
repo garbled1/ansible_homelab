@@ -68,7 +68,7 @@
     - '{{ cert_dir }}'
     - '{{ pki_dir }}/letsencrypt'
   when:
-    - "'webservers' in group_names"
+    - "'webservers' in group_names or 'tags_pbs' in group_names"
 
 - name: push some certs to some places
   copy:
@@ -92,7 +92,7 @@
       mode: '0644'
   register: pushed_certs
   when:
-    - "'webservers' in group_names or 'pbs' in group_names"
+    - "'webservers' in group_names or 'tags_pbs' in group_names"
 
 - name: reload nginx
   systemd:

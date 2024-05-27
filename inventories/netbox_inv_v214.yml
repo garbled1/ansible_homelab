@@ -13,7 +13,6 @@ group_by:
 groups:
   linux: "'debian' in platforms or 'raspbian' in platforms or 'proxmox' in platforms"
   webservers: "'webservers' in tags"
-  pbs: "'pbs' in tags"
   rpi: "'raspbian' in platforms"
   proxmox: "'proxmox' in platforms"
   linuxvm: "'vm' in tags and 'debian' in platforms"
