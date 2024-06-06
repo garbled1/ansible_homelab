@@ -87,7 +87,7 @@
     terms_agreed: yes
     remaining_days: "{{ remaining_days }}"
     data: "{{ acme_data }}"
-  when: acme_data is changed
+#  when: acme_data is changed
 
 - name: generate chained cert
   shell: "cat {{ keydir }}/{{ cert_name }}.cert {{ keydir }}/intermediate.pem > {{ keydir }}/{{ cert_name }}.chained.cert"
